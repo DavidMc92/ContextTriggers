@@ -21,6 +21,7 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:22.0.+'
+    compile 'com.google.android.gms:play-services:8.4.0'
     compile group: 'org.apache.httpcomponents' , name: 'httpclient-android' , version: '4.3.5.1'
+
 }

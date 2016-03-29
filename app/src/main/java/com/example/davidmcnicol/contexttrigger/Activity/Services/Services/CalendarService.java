@@ -42,10 +42,6 @@ public class CalendarService extends Service{
     public void onCreate() {
 
         context = CalendarService.this;
-//        mySensorManager = (SensorManager)getSystemService(context.SENSOR_SERVICE);
-//        countSensor = mySensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-//        mySensorManager.registerListener(this,countSensor,SensorManager.SENSOR_DELAY_NORMAL);
-//
         powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 "MyWakelockTag");

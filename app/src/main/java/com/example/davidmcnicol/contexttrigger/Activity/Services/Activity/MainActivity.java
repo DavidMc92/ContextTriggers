@@ -39,6 +39,8 @@ public class MainActivity extends Activity{
     private Boolean isBarOn = false;
     private Boolean isCalOn = false;
     private final Context context = MainActivity.this;
+    private Boolean test = true;
+    private Boolean test2 = false;
 
 
     @Override

@@ -1,0 +1,77 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/container"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    tools:ignore="MergeRootFrame">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Accelerometer"
+        android:textSize="24sp"
+        android:id="@+id/textView"
+        android:layout_marginTop="20sp"
+        android:layout_marginStart="20sp"
+        android:layout_alignParentStart="true"/>
+
+
+    <Switch
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/switchAcc"
+        android:layout_marginTop="20sp"
+        android:layout_marginEnd="20sp"
+        android:layout_alignParentEnd="true"
+        android:layout_toEndOf="@+id/textView"/>
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Barometer"
+        android:textSize="24sp"
+        android:id="@+id/textViewBarometer"
+        android:layout_marginTop="20sp"
+        android:layout_marginStart="20sp"
+        android:layout_below="@+id/textView"
+        android:layout_alignParentStart="true"/>
+
+
+    <Switch
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/switchBar"
+        android:layout_marginTop="20sp"
+        android:layout_marginEnd="20sp"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/switchAcc"
+        android:layout_toEndOf="@+id/textViewBarometer"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Calendar"
+        android:textSize="24sp"
+        android:id="@+id/textViewCalendar"
+        android:layout_marginTop="20sp"
+        android:layout_marginStart="20sp"
+        android:layout_below="@+id/textViewBarometer"
+        android:layout_alignParentStart="true"/>
+
+
+    <Switch
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/switchCal"
+        android:layout_marginTop="20sp"
+        android:layout_marginEnd="20sp"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/switchBar"
+        android:layout_toEndOf="@+id/textViewCalendar"/>
+
+
+</RelativeLayout>

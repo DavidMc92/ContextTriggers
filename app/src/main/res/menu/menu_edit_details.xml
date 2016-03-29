@@ -1,0 +1,12 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools" tools:context=".CreateNewGoalActivity">
+    <item android:id="@+id/update_name" android:title="Update Name"
+        android:orderInCategory="100" app:showAsAction="never" />
+    <item android:id="@+id/update_target" android:title="Update Target"
+        android:orderInCategory="100" app:showAsAction="never" />
+    <item android:id="@+id/update_measurement" android:title="Update Measurement"
+        android:orderInCategory="100" app:showAsAction="never" />
+
+
+</menu>

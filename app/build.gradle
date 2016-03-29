@@ -22,6 +22,5 @@ android {
 
 dependencies {
     compile 'com.android.support:appcompat-v7:22.0.+'
-    compile 'com.readystatesoftware.sqliteasset:sqliteassethelper:+'
     compile group: 'org.apache.httpcomponents' , name: 'httpclient-android' , version: '4.3.5.1'
 }

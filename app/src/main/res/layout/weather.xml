@@ -9,217 +9,51 @@
     tools:context=".Weather" >
 
 <TextView
-    android:id="@+id/weather_title"
-    android:layout_width="fill_parent"
+    android:id="@+id/weather_description"
+    android:layout_width="wrap_content"
     android:layout_height="40dp"
     android:gravity="center_vertical|center_horizontal"
-    android:text="Weather Report"
-    android:textColor="#ffffff"
-    android:textSize="22sp"
+    android:text="Description: "
+    android:layout_marginStart="10sp"
+    android:textSize="14sp"
     android:textStyle="bold" />
 
-<ImageView
-android:id="@+id/weather_border"
-    android:layout_width="fill_parent"
-    android:layout_height="2dp"
-    android:layout_below="@+id/weather_title"
-    android:layout_marginBottom="10dp"
-    android:background="#CCCCCC" />
-
-<ScrollView
-    android:id="@+id/scrollView1"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:layout_above="@+id/footer_border"
-    android:layout_below="@+id/weather_border" >
-
-<RelativeLayout
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content" >
-
 <TextView
-    android:id="@+id/dateText"
+    android:id="@+id/weather_temp"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_alignParentRight="true"
-    android:layout_alignTop="@+id/icon"
-    android:layout_toRightOf="@+id/icon"
-    android:textColor="#333333"
-    android:textSize="16sp" />
-
-<TextView
-    android:id="@+id/tempText"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_below="@+id/dateText"
-    android:layout_toRightOf="@+id/icon"
-    android:textColor="#333333"
-    android:textSize="16sp" />
-
-<TextView
-android:id="@+id/conditionText"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_alignParentRight="true"
-    android:layout_below="@+id/tempText"
-    android:layout_toRightOf="@+id/icon"
-    android:textColor="#333333"
-    android:textSize="16sp" />
-
-<TextView
-android:id="@+id/humidityText"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_alignParentRight="true"
-    android:layout_below="@+id/conditionText"
-    android:layout_toRightOf="@+id/icon"
-    android:textColor="#333333"
-    android:textSize="16sp" />
-
-<TextView
-android:id="@+id/windText"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_alignParentRight="true"
-    android:layout_below="@+id/humidityText"
-    android:layout_marginBottom="10dp"
-    android:layout_toRightOf="@+id/icon"
-    android:paddingBottom="10dp"
-    android:textColor="#333333"
-    android:textSize="16sp" />
-
-<ImageView
-android:id="@+id/border2"
-    android:layout_width="fill_parent"
-    android:layout_height="2dp"
-    android:layout_below="@+id/windText"
-    android:background="#ff6600" />
-
-<TextView
-    android:id="@+id/forecast_title"
-    android:layout_width="fill_parent"
     android:layout_height="40dp"
-    android:layout_below="@+id/border2"
     android:gravity="center_vertical|center_horizontal"
-    android:text="Forecast"
-    android:textColor="#333333"
-    android:textSize="18sp"
+    android:text="Temperature: "
+    android:layout_marginStart="10sp"
+    android:layout_below="@+id/weather_description"
+    android:layout_marginTop="10sp"
+    android:textSize="14sp"
     android:textStyle="bold" />
 
-<ImageView
-android:id="@+id/forecastBorder"
-    android:layout_width="fill_parent"
-    android:layout_height="1dp"
-    android:layout_below="@+id/forecast_title"
-    android:background="#CCCCCC" />
-
 <TextView
-android:id="@+id/day1"
+    android:id="@+id/weather_humidity"
     android:layout_width="wrap_content"
     android:layout_height="40dp"
-    android:layout_alignParentLeft="true"
-    android:layout_alignParentRight="true"
-    android:layout_below="@+id/forecastBorder"
-    android:gravity="left|center_vertical"
-    android:paddingLeft="10dp"
-    android:textAlignment="gravity"
-    android:textColor="#333333"
-    android:textSize="16sp" />
+    android:gravity="center_vertical|center_horizontal"
+    android:text="Humidity: "
+    android:layout_marginStart="10sp"
+    android:layout_below="@+id/weather_temp"
+    android:layout_marginTop="10sp"
+    android:textSize="14sp"
+    android:textStyle="bold" />
 
 <TextView
-android:id="@+id/day2"
+    android:id="@+id/weather_pressure"
     android:layout_width="wrap_content"
     android:layout_height="40dp"
-    android:layout_alignParentLeft="true"
-    android:layout_alignParentRight="true"
-    android:layout_below="@+id/day1"
-    android:gravity="left|center_vertical"
-    android:paddingLeft="10dp"
-    android:textAlignment="gravity"
-    android:textColor="#333333"
-    android:textSize="16sp" />
+    android:gravity="center_vertical|center_horizontal"
+    android:text="Pressure: "
+    android:layout_marginStart="10sp"
+    android:layout_below="@+id/weather_humidity"
+    android:layout_marginTop="10sp"
+    android:textSize="14sp"
+    android:textStyle="bold" />
 
-<TextView
-android:id="@+id/day3"
-    android:layout_width="wrap_content"
-    android:layout_height="40dp"
-    android:layout_alignParentLeft="true"
-    android:layout_alignParentRight="true"
-    android:layout_below="@+id/day2"
-    android:gravity="left|center_vertical"
-    android:paddingLeft="10dp"
-    android:textAlignment="gravity"
-    android:textColor="#333333"
-    android:textSize="16sp" />
-
-<TextView
-android:id="@+id/day4"
-    android:layout_width="wrap_content"
-    android:layout_height="40dp"
-    android:layout_alignParentLeft="true"
-    android:layout_alignParentRight="true"
-    android:layout_below="@+id/day3"
-    android:gravity="left|center_vertical"
-    android:paddingLeft="10dp"
-    android:textAlignment="gravity"
-    android:textColor="#333333"
-    android:textSize="16sp" />
-
-<ImageView
-android:id="@+id/icon"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_alignParentLeft="true"
-    android:layout_alignParentTop="true"
-    android:padding="10dp" />
-    </RelativeLayout>
-    </ScrollView>
-
-<ImageView
-android:id="@+id/footer_border"
-    android:layout_width="fill_parent"
-    android:layout_height="2dp"
-    android:layout_above="@+id/footer"
-    android:background="#CCCCCC" />
-
-
-
-<ImageView
-android:id="@+id/footer"
-    android:layout_width="fill_parent"
-    android:layout_height="50dp"
-    android:layout_alignParentBottom="true"
-    android:background="#E4E4E4" />
-
-
-
-<ImageButton
-android:id="@+id/reportBtn"
-    android:layout_width="160dp"
-    android:layout_height="wrap_content"
-    android:layout_alignParentBottom="true"
-    android:layout_alignParentRight="true"
-    android:layout_alignTop="@+id/footer"
-    android:paddingBottom="5dp"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp"
-    android:paddingTop="5dp"
-    android:src="@drawable/ic_search_white_48dp" />
-
-
-
-<ImageButton
-android:id="@+id/backBtn"
-    android:layout_width="160dp"
-    android:layout_height="wrap_content"
-    android:layout_alignParentBottom="true"
-    android:layout_alignParentLeft="true"
-    android:layout_alignTop="@+id/footer"
-    android:paddingBottom="5dp"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp"
-    android:paddingTop="5dp"
-    android:src="@drawable/ic_add_white_48dp" />
 
 
 

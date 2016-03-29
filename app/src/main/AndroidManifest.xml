@@ -8,7 +8,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".Activity.Services.Activity.MainActivity"
+            android:name=".Activity.Services.Activity.WeatherActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -16,6 +16,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".Activity.Services.Activity.MainActivity"
+            android:label="name"
+            android:screenOrientation="portrait"/>
 
         <service android:name=".Activity.Services.Services.TestService" />
         <service android:name=".Activity.Services.Services.BarometerService" />
@@ -23,5 +26,6 @@
     </application>
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.READ_CALENDAR" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
 </manifest>

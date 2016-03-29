@@ -3,47 +3,27 @@ package com.example.davidmcnicol.contexttrigger.Activity.Services.Activity;
 import android.app.Activity;
 import android.os.Bundle;
 
-
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.StringTokenizer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.HttpContext;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
-
 import android.app.ProgressDialog;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import com.example.davidmcnicol.contexttrigger.R;
+
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGetHC4;
+import org.apache.http.client.methods.HttpRequestBaseHC4;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Created by davidmcnicol on 15/03/16.
@@ -51,9 +31,9 @@ import com.example.davidmcnicol.contexttrigger.R;
 public class WeatherActivity extends Activity {
 
 
-    private String temperature, date, condition, humidity, wind, link;
+    private String a;
     private Bitmap icon = null;
-    private TextView title, tempText, dateText, conditionText, windText, humidityText,day1,day2, day3, day4;
+    private TextView temperatureTV, descriptionTV, humidityTV, pressureTV;
     private ImageView image;
     private ArrayList<String> weather = new ArrayList<String>();
     private ProgressDialog dialog;
@@ -64,22 +44,10 @@ public class WeatherActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.weather);
 
-
-        image = (ImageView)findViewById(R.id.icon);
-        title = (TextView) findViewById(R.id.weather_title);
-        dateText = (TextView) findViewById(R.id.dateText);
-        tempText = (TextView) findViewById(R.id.tempText);
-        conditionText = (TextView) findViewById(R.id.conditionText);
-        humidityText = (TextView) findViewById(R.id.humidityText);
-        windText = (TextView) findViewById(R.id.windText);
-        day1 = (TextView)findViewById(R.id.day1);
-        day2 = (TextView)findViewById(R.id.day2);
-        day3 = (TextView)findViewById(R.id.day3);
-        day4 = (TextView)findViewById(R.id.day4);
-//        weatherLink = (TextView)findViewById(R.id.weatherLink);
-
-        ImageButton backBtn = (ImageButton) findViewById(R.id.backBtn);
-        ImageButton report = (ImageButton) findViewById(R.id.reportBtn);
+        descriptionTV = (TextView) findViewById(R.id.weather_description);
+        temperatureTV = (TextView) findViewById(R.id.weather_temp);
+        pressureTV = (TextView) findViewById(R.id.weather_pressure);
+        humidityTV = (TextView) findViewById(R.id.weather_humidity);
 
 
         new retrieve_weatherTask().execute();
@@ -96,174 +64,84 @@ public class WeatherActivity extends Activity {
 
     protected class retrieve_weatherTask extends AsyncTask<Void, String, String> {
 
-        protected void onPreExecute(){
-            dialog = new ProgressDialog(WeatherActivity.this);
-            dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            dialog.setMessage("Loading…");
-            dialog.setCancelable(false);
-            dialog.show();
-        }
+//        protected void onPreExecute(){
+//            Log.d("Here","1");
+//            dialog = new ProgressDialog(WeatherActivity.this);
+//            dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+//            dialog.setMessage("Loading…");
+//            dialog.setCancelable(false);
+//            dialog.show();
+//        }
 
         @Override
         protected String doInBackground(Void... arg0) {
-        // TODO Auto-generated method stub
-            String qResult = "";
-            HttpClient httpClient = new DefaultHttpClient();
-            HttpContext localContext = new BasicHttpContext();
-            HttpGet httpGet = new HttpGet("http://weather.yahooapis.com/forecastrss?w=2295425&u=c&#8221");
+            Log.d("Here","2");
+            String response = "";
+            String url = "http://api.openweathermap.org/data/2.5/weather?q=glasgow,uk&APPID=326a256e75a2b049deb89119dfb778bf";
+            CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+            HttpGetHC4 request = new HttpGetHC4(url);
 
             try {
-                HttpResponse response = httpClient.execute(httpGet,
-                        localContext);
-                HttpEntity entity = response.getEntity();
+                CloseableHttpResponse execute = httpClient.execute(request);
 
-                if (entity != null) {
-                    InputStream inputStream = entity.getContent();
-                    Reader in = new InputStreamReader(inputStream);
-                    BufferedReader bufferedreader = new BufferedReader(in);
-                    StringBuilder stringBuilder = new StringBuilder();
-                    String stringReadLine = null;
-                    while ((stringReadLine = bufferedreader.readLine()) != null) {
-                        stringBuilder.append(stringReadLine + "\n");
-                    }
-                    qResult = stringBuilder.toString();
+                InputStream content = execute.getEntity().getContent();
+
+                BufferedReader buffer = new BufferedReader(new InputStreamReader(content));
+                String s = "";
+
+                while ((s = buffer.readLine()) != null) {
+                    response += s;
                 }
 
-            } catch (ClientProtocolException e) {
+            }catch (IOException e) {
                 e.printStackTrace();
-                Toast.makeText(WeatherActivity.this, e.toString(), Toast.LENGTH_LONG)
-                        .show();
-            } catch (IOException e) {
-                e.printStackTrace();
-                Toast.makeText(WeatherActivity.this, e.toString(), Toast.LENGTH_LONG)
-                        .show();
             }
-
-            Document dest = null;
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory
-                    .newInstance();
-            DocumentBuilder parser;
-            try {
-                parser = dbFactory.newDocumentBuilder();
-                dest = parser
-                        .parse(new ByteArrayInputStream(qResult.getBytes()));
-            } catch (ParserConfigurationException e1) {
-                e1.printStackTrace();
-                Toast.makeText(WeatherActivity.this, e1.toString(), Toast.LENGTH_LONG)
-                        .show();
-            } catch (SAXException e) {
-                e.printStackTrace();
-                Toast.makeText(WeatherActivity.this, e.toString(), Toast.LENGTH_LONG)
-                        .show();
-            } catch (IOException e) {
-                e.printStackTrace();
-                Toast.makeText(WeatherActivity.this, e.toString(), Toast.LENGTH_LONG)
-                        .show();
-            }
-
-            Node temperatureNode = dest.getElementsByTagName(
-                    "yweather:condition").item(0);
-            temperature = temperatureNode.getAttributes()
-                    .getNamedItem("temp").getNodeValue().toString();
-            Node tempUnitNode = dest.getElementsByTagName("yweather:units").item(0);
-            temperature = temperature + "°" +tempUnitNode.getAttributes().getNamedItem("temperature").getNodeValue().toString();
-
-            Node dateNode = dest.getElementsByTagName("yweather:forecast")
-            .item(0);
-            date = dateNode.getAttributes().getNamedItem("date")
-                    .getNodeValue().toString();
-
-            Node conditionNode = dest
-                    .getElementsByTagName("yweather:condition").item(0);
-            condition = conditionNode.getAttributes()
-                    .getNamedItem("text").getNodeValue().toString();
-
-            Node humidityNode = dest
-                    .getElementsByTagName("yweather:atmosphere").item(0);
-            humidity = humidityNode.getAttributes()
-                    .getNamedItem("humidity").getNodeValue().toString();
-            humidity = humidity + "%";
-
-            Node windNode = dest.getElementsByTagName("yweather:wind").item(0);
-            wind = windNode.getAttributes().getNamedItem("speed").getNodeValue().toString();
-            Node windUnitNode = dest.getElementsByTagName("yweather:units").item(0);
-            wind = wind + " "+windUnitNode.getAttributes().getNamedItem("speed")
-                    .getNodeValue().toString();
-
-            String desc = dest.getElementsByTagName("item").item(0)
-                    .getChildNodes().item(13).getTextContent().toString();
-            StringTokenizer str = new StringTokenizer(desc, "<=>");
-            System.out.println("Tokens: " + str.nextToken("=>"));
-            String src = str.nextToken();
-            System.out.println("src: "+ src);
-            String url1 = src.substring(1, src.length() - 2);
-            Pattern TAG_REGEX = Pattern.compile("(.+?)<br />");
-            Matcher matcher = TAG_REGEX.matcher(desc);
-            while (matcher.find()) {
-                weather.add(matcher.group(1));
-            }
-
-            Pattern links = Pattern.compile("(.+?)<BR/>");
-            matcher = links.matcher(desc);
-            while(matcher.find()){
-                System.out.println("Match Links: "+ (matcher.group(1)));
-                link = matcher.group(1);
-            }
-
-/* String test = (Html.fromHtml(desc)).toString();
-System.out.println("test: "+ test);
-StringTokenizer tkn = new StringTokenizer(test);
-for(int i=0; i < tkn.countTokens(); i++){
-System.out.println("Remaining: "+tkn.nextToken());
-}*/
-
-            InputStream in = null;
-            try {
-// in = OpenHttpConnection(url1);
-                int response = -1;
-                URL url = new URL(url1);
-                URLConnection conn = url.openConnection();
-
-                if (!(conn instanceof HttpURLConnection))
-                    throw new IOException("Not an HTTP connection");
-                HttpURLConnection httpConn = (HttpURLConnection) conn;
-                httpConn.setAllowUserInteraction(false);
-                httpConn.setInstanceFollowRedirects(true);
-                httpConn.setRequestMethod("GET");
-                httpConn.connect();
-
-                response = httpConn.getResponseCode();
-                if (response == HttpURLConnection.HTTP_OK) {
-                    System.out.println("*********************");
-                    in = httpConn.getInputStream();
-                }
-                icon = BitmapFactory.decodeStream(in);
-                in.close();
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
-            return qResult;
-
+            return response;
         }
 
         protected void onPostExecute(String result) {
-            System.out.println("POST EXECUTE");
-            if(dialog.isShowing())
-                dialog.dismiss();
-            tempText.setText("Temperature: "+temperature);
-            conditionText.setText("Condition: "+condition);
-            dateText.setText("Date: "+date);
-            humidityText.setText("Humidity: "+humidity);
-            windText.setText("Wind: " + wind);
-            image.setImageBitmap(icon);
-            day1.setText(weather.get(3));
-            day2.setText(weather.get(4));
-            day3.setText(weather.get(5));
-            day4.setText(weather.get(6));
-//            weatherLink.setText(Html.fromHtml(link));
+
+            Log.d("Here","3   " + result);
+            String test = result;
+            try {
+// parse the json result returned from the service
+                JSONObject jsonResult = new JSONObject(test);
+
+// parse out the temperature from the JSON result
+                double temperature = jsonResult.getJSONObject("main").getDouble("temp");
+                temperature = ConvertTemperatureToFarenheit(temperature);
+
+                // parse out the pressure from the JSON Result
+                double pressure = jsonResult.getJSONObject("main").getDouble("pressure");
+
+// parse out the humidity from the JSON result
+                double humidity = jsonResult.getJSONObject("main").getDouble("humidity");
+
+// parse out the description from the JSON result
+                String description = jsonResult.getJSONArray("weather").getJSONObject(0).getString("description");
+
+// set all the fields in the activity from the parsed JSON
+//                this.WeatherActivity.SetDescription(description);
+//                this.WeatherActivity.SetTemperature(temperature);
+//                this.WeatherActivity.SetPressure(pressure);
+//                this.WeatherActivity.SetHumidity(humidity);
+
+                descriptionTV.setText("Description: " + description);
+                temperatureTV.setText("Temperature: " + temperature);
+                pressureTV.setText("Pressure: " + pressure);
+                humidityTV.setText("Humidity: " + humidity);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
         }
+        private double ConvertTemperatureToFarenheit(double temperature) {
+            return (temperature - 273) *(9/5) + 32;
+        }
     }
+
+
     
 
 }

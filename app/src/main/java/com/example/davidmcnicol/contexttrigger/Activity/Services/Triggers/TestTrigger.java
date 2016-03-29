@@ -1,19 +1,14 @@
 package com.example.davidmcnicol.contexttrigger.Activity.Services.Triggers;
 
-import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.TaskStackBuilder;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.view.View;
 
-import com.example.davidmcnicol.contexttrigger.Activity.Services.Services.TestService;
 import com.example.davidmcnicol.contexttrigger.R;
 
 /**

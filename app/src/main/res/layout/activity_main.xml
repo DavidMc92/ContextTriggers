@@ -74,4 +74,27 @@
         android:layout_toEndOf="@+id/textViewCalendar"/>
 
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Weather"
+        android:textSize="24sp"
+        android:id="@+id/textViewWeather"
+        android:layout_marginTop="20sp"
+        android:layout_marginStart="20sp"
+        android:layout_below="@+id/textViewCalendar"
+        android:layout_alignParentStart="true"/>
+
+
+    <Switch
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/switchWeather"
+        android:layout_marginTop="20sp"
+        android:layout_marginEnd="20sp"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/switchCal"
+        android:layout_toEndOf="@+id/textViewWeather"/>
+
+
 </RelativeLayout>

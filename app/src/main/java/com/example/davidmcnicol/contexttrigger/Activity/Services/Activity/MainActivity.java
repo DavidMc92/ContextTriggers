@@ -5,13 +5,10 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.CompoundButton;
@@ -19,11 +16,15 @@ import android.widget.Switch;
 
 import com.example.davidmcnicol.contexttrigger.Activity.Services.Model.CalendarTest;
 import com.example.davidmcnicol.contexttrigger.Activity.Services.Services.BarometerService;
+import com.example.davidmcnicol.contexttrigger.Activity.Services.Services.CalendarService;
+import com.example.davidmcnicol.contexttrigger.Activity.Services.Services.WeatherService;
 import com.example.davidmcnicol.contexttrigger.Activity.Services.Triggers.BarometerTrigger;
+import com.example.davidmcnicol.contexttrigger.Activity.Services.Triggers.CalendarTrigger;
 import com.example.davidmcnicol.contexttrigger.Activity.Services.Triggers.TestTrigger;
+import com.example.davidmcnicol.contexttrigger.Activity.Services.Triggers.WeatherTrigger;
 import com.example.davidmcnicol.contexttrigger.R;
 
-import com.example.davidmcnicol.contexttrigger.Activity.Services.Services.TestService;
+import com.example.davidmcnicol.contexttrigger.Activity.Services.Services.AccelerometerService;
 
 /**
  * Created by davidmcnicol on 18/03/16.
@@ -35,9 +36,11 @@ public class MainActivity extends Activity{
     private Switch accSwitch;
     private Switch barSwitch;
     private Switch calSwitch;
+    private Switch weatherSwitch;
     private Boolean isAccOn = false;
     private Boolean isBarOn = false;
     private Boolean isCalOn = false;
+    private Boolean isWeatherOn = false;
     private final Context context = MainActivity.this;
 
 
@@ -89,7 +92,7 @@ public class MainActivity extends Activity{
             }
         });
 
-        final CalendarTest ct = new CalendarTest();
+//        final CalendarTest ct = new CalendarTest();
 
         calSwitch = (Switch) findViewById(R.id.switchCal);
         calSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -101,12 +104,35 @@ public class MainActivity extends Activity{
                 if (isChecked) {
                     isCalOn = true;
                     calSwitch.setChecked(isCalOn);
-                    Log.d("Calendar", "Here");
-                    ct.readCalendar(context);
+//                    ct.readCalendar(context);
+                    startServiceCal(buttonView);
 
                 } else {
                     isCalOn = false;
                     calSwitch.setChecked(isCalOn);
+                    stopServiceBar(buttonView);
+                }
+
+            }
+        });
+
+
+        weatherSwitch = (Switch) findViewById(R.id.switchWeather);
+        weatherSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView,
+                                         boolean isChecked) {
+
+                if (isChecked) {
+                    isWeatherOn = true;
+                    weatherSwitch.setChecked(isWeatherOn);
+                    startServiceWeather(buttonView);
+
+                } else {
+                    isWeatherOn = false;
+                    weatherSwitch.setChecked(isWeatherOn);
+                    stopServiceWeather(buttonView);
                 }
 
             }
@@ -116,13 +142,13 @@ public class MainActivity extends Activity{
 
     // Method to start the service
     public void startServiceAcc(View view) {
-        startService(new Intent(getBaseContext(), TestService.class));
+        startService(new Intent(getBaseContext(), AccelerometerService.class));
         TestTrigger ts = new TestTrigger(getBaseContext());
     }
 
     // Method to stop the service
     public void stopServiceAcc(View view) {
-        stopService(new Intent(getBaseContext(), TestService.class));
+        stopService(new Intent(getBaseContext(), AccelerometerService.class));
 
     }
 
@@ -135,6 +161,30 @@ public class MainActivity extends Activity{
     // Method to stop the service
     public void stopServiceBar(View view) {
         stopService(new Intent(getBaseContext(), BarometerService.class));
+
+    }
+
+    // Method to start the service
+    public void startServiceWeather(View view) {
+        startService(new Intent(getBaseContext(), WeatherService.class));
+        WeatherTrigger wt = new WeatherTrigger(getBaseContext());
+    }
+
+    // Method to stop the service
+    public void stopServiceWeather(View view) {
+        stopService(new Intent(getBaseContext(), WeatherService.class));
+
+    }
+
+    // Method to start the service
+    public void startServiceCal(View view) {
+        startService(new Intent(getBaseContext(), CalendarService.class));
+        CalendarTrigger ct = new CalendarTrigger(getBaseContext());
+    }
+
+    // Method to stop the service
+    public void stopServiceCal(View view) {
+        stopService(new Intent(getBaseContext(), CalendarService.class));
 
     }
 

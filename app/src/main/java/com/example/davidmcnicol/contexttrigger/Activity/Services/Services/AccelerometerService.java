@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * Created by davidmcnicol on 18/03/16.
  */
-public class TestService extends Service implements SensorEventListener{
+public class AccelerometerService extends Service implements SensorEventListener{
 
     /** interface for clients that bind */
     IBinder mBinder;
@@ -44,7 +44,7 @@ public class TestService extends Service implements SensorEventListener{
     @Override
     public void onCreate() {
 
-        context = TestService.this;
+        context = AccelerometerService.this;
         mySensorManager = (SensorManager)getSystemService(context.SENSOR_SERVICE);
         countSensor = mySensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mySensorManager.registerListener(this,countSensor,SensorManager.SENSOR_DELAY_NORMAL);

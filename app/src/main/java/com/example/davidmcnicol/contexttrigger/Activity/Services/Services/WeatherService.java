@@ -100,7 +100,6 @@ public class WeatherService extends Service {
 
     private static void sendMessageToActivity(String msg) {
 
-        Log.d("Here", "RECEIVED 1");
         Intent intent = new Intent("weatherData");
         // You can also include some extra data.
         intent.putExtra("Status", msg);
@@ -121,7 +120,6 @@ public class WeatherService extends Service {
 
         @Override
         protected String doInBackground(Void... arg0) {
-            Log.d("Here", "2");
             String response = "";
             String url = "http://api.openweathermap.org/data/2.5/weather?q=glasgow,uk&APPID=326a256e75a2b049deb89119dfb778bf";
             CloseableHttpClient httpClient = HttpClientBuilder.create().build();
@@ -147,7 +145,7 @@ public class WeatherService extends Service {
 
         protected void onPostExecute(String result) {
 
-            Log.d("Here","3   " + result);
+//            Log.d("Here","3   " + result);
             String test = result;
             try {
                 // parse the json result returned from the service

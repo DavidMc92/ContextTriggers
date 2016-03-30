@@ -9,18 +9,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 
-import com.example.davidmcnicol.contexttrigger.Activity.Services.Model.CalendarTest;
 import com.example.davidmcnicol.contexttrigger.Activity.Services.Services.BarometerService;
-import com.example.davidmcnicol.contexttrigger.Activity.Services.Services.CalendarService;
 import com.example.davidmcnicol.contexttrigger.Activity.Services.Services.WeatherService;
 import com.example.davidmcnicol.contexttrigger.Activity.Services.Triggers.BarometerTrigger;
 import com.example.davidmcnicol.contexttrigger.Activity.Services.Triggers.CalendarTrigger;
-import com.example.davidmcnicol.contexttrigger.Activity.Services.Triggers.TestTrigger;
+import com.example.davidmcnicol.contexttrigger.Activity.Services.Triggers.AccelerometerTrigger;
 import com.example.davidmcnicol.contexttrigger.Activity.Services.Triggers.WeatherTrigger;
 import com.example.davidmcnicol.contexttrigger.R;
 
@@ -42,6 +39,11 @@ public class MainActivity extends Activity{
     private Boolean isCalOn = false;
     private Boolean isWeatherOn = false;
     private final Context context = MainActivity.this;
+    private CalendarTrigger ct;
+    private AccelerometerTrigger at;
+    private BarometerTrigger bt;
+    private WeatherTrigger wt;
+
 
 
     @Override
@@ -110,7 +112,7 @@ public class MainActivity extends Activity{
                 } else {
                     isCalOn = false;
                     calSwitch.setChecked(isCalOn);
-                    stopServiceBar(buttonView);
+                    stopServiceCal(buttonView);
                 }
 
             }
@@ -142,49 +144,50 @@ public class MainActivity extends Activity{
 
     // Method to start the service
     public void startServiceAcc(View view) {
-        startService(new Intent(getBaseContext(), AccelerometerService.class));
-        TestTrigger ts = new TestTrigger(getBaseContext());
+//        startService(new Intent(getBaseContext(), AccelerometerService.class));
+        at = new AccelerometerTrigger(getBaseContext());
     }
 
     // Method to stop the service
     public void stopServiceAcc(View view) {
-        stopService(new Intent(getBaseContext(), AccelerometerService.class));
-
+//        stopService(new Intent(getBaseContext(), AccelerometerService.class));
+        at.stop();
     }
 
     // Method to start the service
     public void startServiceBar(View view) {
-        startService(new Intent(getBaseContext(), BarometerService.class));
-        BarometerTrigger bt = new BarometerTrigger(getBaseContext());
+//        startService(new Intent(getBaseContext(), BarometerService.class));
+        bt = new BarometerTrigger(getBaseContext());
     }
 
     // Method to stop the service
     public void stopServiceBar(View view) {
-        stopService(new Intent(getBaseContext(), BarometerService.class));
-
+//        stopService(new Intent(getBaseContext(), BarometerService.class));
+        bt.stop();
     }
 
     // Method to start the service
     public void startServiceWeather(View view) {
-        startService(new Intent(getBaseContext(), WeatherService.class));
-        WeatherTrigger wt = new WeatherTrigger(getBaseContext());
+//        startService(new Intent(getBaseContext(), WeatherService.class));
+        wt = new WeatherTrigger(getBaseContext());
     }
 
     // Method to stop the service
     public void stopServiceWeather(View view) {
-        stopService(new Intent(getBaseContext(), WeatherService.class));
-
+//        stopService(new Intent(getBaseContext(), WeatherService.class));
+        wt.stop();
     }
 
     // Method to start the service
     public void startServiceCal(View view) {
-        startService(new Intent(getBaseContext(), CalendarService.class));
-        CalendarTrigger ct = new CalendarTrigger(getBaseContext());
+//        startService(new Intent(getBaseContext(), CalendarService.class));
+        ct = new CalendarTrigger(getBaseContext());
     }
 
     // Method to stop the service
     public void stopServiceCal(View view) {
-        stopService(new Intent(getBaseContext(), CalendarService.class));
+//        stopService(new Intent(getBaseContext(), CalendarService.class));
+        ct.stop();
 
     }
 

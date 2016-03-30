@@ -40,7 +40,6 @@ public class CalendarService extends Service{
 
     @Override
     public void onCreate() {
-
         context = CalendarService.this;
         powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,

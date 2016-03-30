@@ -10,6 +10,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.example.davidmcnicol.contexttrigger.Activity.Services.Services.CalendarService;
 import com.example.davidmcnicol.contexttrigger.R;
 
 import java.util.ArrayList;
@@ -20,13 +21,16 @@ import java.util.ArrayList;
 public class CalendarTrigger extends BroadcastReceiver{
 
     private ArrayList<String> events = new ArrayList<>();
+    private Context context;
 
     public CalendarTrigger(Context context)
     {
+        this.context = context;
+
         LocalBroadcastManager.getInstance(context).registerReceiver(
                 this, new IntentFilter("calData"));
 
-
+        context.startService(new Intent(context, CalendarService.class));
     }
 
     @Override
@@ -34,19 +38,23 @@ public class CalendarTrigger extends BroadcastReceiver{
 
         events = intent.getStringArrayListExtra("Status");
 
+        if(events.size() == 0)
+        {
+            Log.d("Here", "No events");
+        }
         for(int i = 0; i < events.size(); i ++) {
             Log.d("events ct", events.get(0).toString());
         }
     }
 
-    public void sendNotification(Context context, String goalName, String action)
+    public void sendNotification(Context context, String title, String message)
     {
 
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(context)
                         .setSmallIcon(R.drawable.ic_directions_walk_black_24dp)
-                        .setContentTitle(goalName)
-                        .setContentText(action)
+                        .setContentTitle(title)
+                        .setContentText(message)
                         .setDefaults(Notification.DEFAULT_VIBRATE);
 
 //        // Creates an explicit intent for an Activity in your app
@@ -72,5 +80,10 @@ public class CalendarTrigger extends BroadcastReceiver{
         // mId allows you to update the notification later on.
         mNotificationManager.notify(0, mBuilder.build());
 
+    }
+
+    public void stop()
+    {
+        context.stopService(new Intent(context, CalendarService.class));
     }
 }

@@ -11,6 +11,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.example.davidmcnicol.contexttrigger.Activity.Services.Services.AccelerometerService;
+import com.example.davidmcnicol.contexttrigger.Activity.Services.Services.WeatherService;
 import com.example.davidmcnicol.contexttrigger.R;
 
 
@@ -20,12 +21,16 @@ import com.example.davidmcnicol.contexttrigger.R;
 public class WeatherTrigger extends BroadcastReceiver {
 
     private int stepCount = 0;
+    private Context context;
 
     public WeatherTrigger(Context context)
     {
+        this.context = context;
+
         LocalBroadcastManager.getInstance(context).registerReceiver(
                 this, new IntentFilter("weatherData"));
 
+        context.startService(new Intent(context, WeatherService.class));
 
     }
 
@@ -37,10 +42,13 @@ public class WeatherTrigger extends BroadcastReceiver {
             String message = intent.getStringExtra("Status");
             stepCount += Integer.parseInt(message);
 
+
+//            sendNotification(context,"Weather",message);
+
             if(stepCount==5)
             {
                 stepCount = 0;
-                sendNotification(context,"Rain: Done 5 steps");
+                sendNotification(context,"Weather","Rain: Done 5 steps");
                 context.stopService(new Intent(context, AccelerometerService.class));
                 LocalBroadcastManager.getInstance(context).unregisterReceiver(mMessageReceiver);
             }
@@ -51,29 +59,31 @@ public class WeatherTrigger extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        Log.d("Here", "RECEIVED 2");
+
         String message = intent.getStringExtra("Status");
 
-        if(message.contains("rain"))
-        {
-            context.startService(new Intent(context, AccelerometerService.class));
+//        Log.d("Here", message);
+        //status: clear sky, few clouds, scattered clouds, broken clouds, shower rain, rain, thunderstorm, snow, mist
+//        if(message.contains("rain"))
+//        {
+//            context.startService(new Intent(context, AccelerometerService.class));
+//
+//            LocalBroadcastManager.getInstance(context).registerReceiver(
+//                    mMessageReceiver, new IntentFilter("accData"));
+//
+//        }
 
-            LocalBroadcastManager.getInstance(context).registerReceiver(
-                    mMessageReceiver, new IntentFilter("accData"));
-
-        }
-
-//        sendNotification(context,message);
+        sendNotification(context,"Weather",message);
 
     }
 
-    public void sendNotification(Context context, String weather) {
+    public void sendNotification(Context context, String title, String message) {
 
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(context)
                         .setSmallIcon(R.drawable.ic_directions_walk_black_24dp)
-                        .setContentTitle("Weather")
-                        .setContentText(weather)
+                        .setContentTitle(title)
+                        .setContentText(message)
                         .setDefaults(Notification.DEFAULT_VIBRATE);
 
         NotificationManager mNotificationManager =
@@ -84,4 +94,9 @@ public class WeatherTrigger extends BroadcastReceiver {
 //        mId++;
     }
 
+    public void stop()
+    {
+        context.stopService(new Intent(context, WeatherService.class));
     }
+
+}

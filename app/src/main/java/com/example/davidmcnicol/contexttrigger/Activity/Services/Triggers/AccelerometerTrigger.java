@@ -9,21 +9,26 @@ import android.content.IntentFilter;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 
+import com.example.davidmcnicol.contexttrigger.Activity.Services.Services.AccelerometerService;
 import com.example.davidmcnicol.contexttrigger.R;
 
 /**
  * Created by davidmcnicol on 18/03/16.
  */
-public class TestTrigger extends BroadcastReceiver {
+public class AccelerometerTrigger extends BroadcastReceiver {
 
     private int stepCount = 0;
     private Context context;
     private int mId = 0;
+    private static String GROUP = "Group";
 
-    public TestTrigger(Context context)
+    public AccelerometerTrigger(Context context)
     {
+        this.context = context;
         LocalBroadcastManager.getInstance(context).registerReceiver(
                 this, new IntentFilter("accData"));
+
+        context.startService(new Intent(context, AccelerometerService.class));
     }
 
 
@@ -33,10 +38,10 @@ public class TestTrigger extends BroadcastReceiver {
         String message = intent.getStringExtra("Status");
         stepCount += Integer.parseInt(message);
 
-        if(stepCount==20)
+        if(stepCount==5)
         {
             stepCount = 0;
-            sendNotification(context,"Steps","Done 20 steps");
+            sendNotification(context,"Steps","Done 5 steps");
         }
 //            Log.d("MSG", message);
         // Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
@@ -60,15 +65,18 @@ public class TestTrigger extends BroadcastReceiver {
 //    };
 
 
-    public void sendNotification(Context context, String goalName, String action)
+    public void sendNotification(Context context, String title, String message)
     {
 
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(context)
                         .setSmallIcon(R.drawable.ic_directions_walk_black_24dp)
-                        .setContentTitle(goalName)
-                        .setContentText(action)
-                        .setDefaults(Notification.DEFAULT_VIBRATE);
+                        .setContentTitle(title)
+                        .setContentText(message)
+                        .setDefaults(Notification.DEFAULT_VIBRATE)
+                        .setGroup(GROUP)
+                        .setGroupSummary(true)
+                        .setNumber(mId);
 
 //        // Creates an explicit intent for an Activity in your app
 //        Intent resultIntent = new Intent(context, MainActivity.class);
@@ -91,9 +99,14 @@ public class TestTrigger extends BroadcastReceiver {
         NotificationManager mNotificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         // mId allows you to update the notification later on.
-        mNotificationManager.notify(mId, mBuilder.build());
+        mNotificationManager.notify(0, mBuilder.build());
 
         mId++;
 
+    }
+
+    public void stop()
+    {
+        context.stopService(new Intent(context, AccelerometerService.class));
     }
 }

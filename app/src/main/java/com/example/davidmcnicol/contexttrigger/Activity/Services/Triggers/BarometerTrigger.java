@@ -10,6 +10,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.example.davidmcnicol.contexttrigger.Activity.Services.Services.BarometerService;
 import com.example.davidmcnicol.contexttrigger.R;
 
 /**
@@ -19,11 +20,17 @@ public class BarometerTrigger extends BroadcastReceiver {
 
     private double barValue = 0.0;
     private int mId = 0;
+    private Context context;
 
     public BarometerTrigger(Context context)
     {
+
+        this.context = context;
+
         LocalBroadcastManager.getInstance(context).registerReceiver(
                 this, new IntentFilter("barData"));
+
+        context.startService(new Intent(context, BarometerService.class));
     }
 
     @Override
@@ -42,14 +49,14 @@ public class BarometerTrigger extends BroadcastReceiver {
     }
 
 
-    public void sendNotification(Context context, String goalName, String action)
+    public void sendNotification(Context context, String title, String message)
     {
 
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(context)
                         .setSmallIcon(R.drawable.ic_directions_walk_black_24dp)
-                        .setContentTitle(goalName)
-                        .setContentText(action)
+                        .setContentTitle(title)
+                        .setContentText(message)
                         .setDefaults(Notification.DEFAULT_VIBRATE);
 
 //        // Creates an explicit intent for an Activity in your app
@@ -77,5 +84,10 @@ public class BarometerTrigger extends BroadcastReceiver {
 
         mId++;
 
+    }
+
+    public void stop()
+    {
+        context.stopService(new Intent(context, BarometerService.class));
     }
 }

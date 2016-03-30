@@ -215,7 +215,7 @@ public class MainActivity extends Activity{
 
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(context)
-                        .setSmallIcon(R.drawable.ic_directions_walk_black_24dp)
+                        .setSmallIcon(R.drawable.ic_add_black_24dp)
                         .setContentTitle(goalName)
                         .setContentText(action)
                         .setDefaults(Notification.DEFAULT_VIBRATE);

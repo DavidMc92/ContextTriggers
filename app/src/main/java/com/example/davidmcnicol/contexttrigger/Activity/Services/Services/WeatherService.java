@@ -13,10 +13,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGetHC4;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -24,6 +20,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 /**
  * Created by davidmcnicol on 29/03/16.
@@ -121,23 +119,28 @@ public class WeatherService extends Service {
         @Override
         protected String doInBackground(Void... arg0) {
             String response = "";
-            String url = "http://api.openweathermap.org/data/2.5/weather?q=glasgow,uk&APPID=326a256e75a2b049deb89119dfb778bf";
-            CloseableHttpClient httpClient = HttpClientBuilder.create().build();
-            HttpGetHC4 request = new HttpGetHC4(url);
+            String urlString = "http://api.openweathermap.org/data/2.5/weather?q=glasgow,uk&APPID=326a256e75a2b049deb89119dfb778bf";
+//            CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+//            HttpGetHC4 request = new HttpGetHC4(url);
 
             try {
-                CloseableHttpResponse execute = httpClient.execute(request);
+                URL url = new URL(urlString);
+                HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+                connection.setRequestMethod("GET");
+                connection.setDoInput(true);
+                connection.connect();
 
-                InputStream content = execute.getEntity().getContent();
+//                InputStream in = new BufferedInputStream(connection.getInputStream());
+                BufferedReader buffer = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 
-                BufferedReader buffer = new BufferedReader(new InputStreamReader(content));
                 String s = "";
 
                 while ((s = buffer.readLine()) != null) {
                     response += s;
                 }
 
-            }catch (IOException e) {
+            }catch (IOException e )
+            {
                 e.printStackTrace();
             }
             return response;

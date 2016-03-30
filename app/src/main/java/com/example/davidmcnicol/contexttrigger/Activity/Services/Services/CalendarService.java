@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.provider.CalendarContract;
@@ -25,7 +26,7 @@ import java.util.HashSet;
 public class CalendarService extends Service{
 
     /** interface for clients that bind */
-    IBinder mBinder;
+//    IBinder mBinder;
 
     /** indicates how to behave if the service is killed */
     int mStartMode;
@@ -37,6 +38,7 @@ public class CalendarService extends Service{
     private PowerManager powerManager;
     private PowerManager.WakeLock wakeLock;
     private ArrayList<String> calEvents = new ArrayList<>();
+    private final IBinder mBinder = new LocalBinder();
 
     @Override
     public void onCreate() {
@@ -49,11 +51,18 @@ public class CalendarService extends Service{
 
     }
 
+    public class LocalBinder extends Binder {
+        public CalendarService getService() {
+            // Return this instance of LocalService so clients can call public methods
+            return CalendarService.this;
+        }
+    }
+
     /** The service is starting, due to a call to startService() */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        readCalendar();
+//        readCalendar();
         return 1;
     }
 
@@ -84,7 +93,7 @@ public class CalendarService extends Service{
 
     }
 
-    private void readCalendar()
+    public ArrayList readCalendar()
     {
         ContentResolver contentResolver = context.getContentResolver();
 
@@ -147,7 +156,8 @@ public class CalendarService extends Service{
             calEvents.add(s);
         }
 
-        sendMessageToActivity(calEvents);
+//        sendMessageToActivity(calEvents);
+        return calEvents;
 
 //        String[] myList = begin.toString().split(" ");
 //        for(int i = 0; i < myList.length; i++) {

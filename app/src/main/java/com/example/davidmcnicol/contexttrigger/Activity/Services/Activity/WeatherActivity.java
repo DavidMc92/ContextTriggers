@@ -3,10 +3,14 @@ package com.example.davidmcnicol.contexttrigger.Activity.Services.Activity;
 import android.app.Activity;
 import android.os.Bundle;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import android.app.ProgressDialog;
 import android.graphics.Bitmap;
@@ -17,11 +21,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import com.example.davidmcnicol.contexttrigger.R;
 
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGetHC4;
-import org.apache.http.client.methods.HttpRequestBaseHC4;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -77,25 +77,47 @@ public class WeatherActivity extends Activity {
         protected String doInBackground(Void... arg0) {
             Log.d("Here","2");
             String response = "";
-            String url = "http://api.openweathermap.org/data/2.5/weather?q=glasgow,uk&APPID=326a256e75a2b049deb89119dfb778bf";
-            CloseableHttpClient httpClient = HttpClientBuilder.create().build();
-            HttpGetHC4 request = new HttpGetHC4(url);
+            String urlString = "http://api.openweathermap.org/data/2.5/weather?q=glasgow,uk&APPID=326a256e75a2b049deb89119dfb778bf";
 
             try {
-                CloseableHttpResponse execute = httpClient.execute(request);
+                URL url = new URL(urlString);
+                HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+                connection.setRequestMethod("GET");
+                connection.setDoInput(true);
+                connection.connect();
 
-                InputStream content = execute.getEntity().getContent();
+//                InputStream in = new BufferedInputStream(connection.getInputStream());
+                BufferedReader buffer = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 
-                BufferedReader buffer = new BufferedReader(new InputStreamReader(content));
                 String s = "";
 
                 while ((s = buffer.readLine()) != null) {
                     response += s;
                 }
 
-            }catch (IOException e) {
+            }catch (IOException e )
+            {
                 e.printStackTrace();
             }
+
+//            CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+//            HttpGetHC4 request = new HttpGetHC4(url);
+
+//            try {
+//                CloseableHttpResponse execute = httpClient.execute(request);
+//
+//                InputStream content = execute.getEntity().getContent();
+//
+//                BufferedReader buffer = new BufferedReader(new InputStreamReader(content));
+//                String s = "";
+//
+//                while ((s = buffer.readLine()) != null) {
+//                    response += s;
+//                }
+//
+//            }catch (IOException e) {
+//                e.printStackTrace();
+//            }
             return response;
         }
 

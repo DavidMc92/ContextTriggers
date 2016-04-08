@@ -105,36 +105,41 @@ public class AccelerometerService extends Service implements SensorEventListener
         float y = event.values[1];
         float z = event.values[2];
 
-        long curTime = System.currentTimeMillis();
+//        long curTime = System.currentTimeMillis();
+//
+//        if ((curTime - lastUpdate) > 100) {
+//            long diffTime = (curTime - lastUpdate);
+//            lastUpdate = curTime;
 
-        if ((curTime - lastUpdate) > 100) {
-            long diffTime = (curTime - lastUpdate);
-            lastUpdate = curTime;
-
-            float speed = Math.abs(x + y + z - last_x - last_y - last_z)/ diffTime * 10000;
-
-            if (speed > SHAKE_THRESHOLD) {
-                stepCount++;
-                sendMessageToActivity("1");
-            }
-
-            last_x = x;
-            last_y = y;
-            last_z = z;
-
-            String s = "X: " + last_x + "  Y: " + last_y + "  Z: " + last_z;
+//            float speed = Math.abs(x + y + z - last_x - last_y - last_z)/ diffTime * 10000;
+//
+//            if (speed > SHAKE_THRESHOLD) {
+//                stepCount++;
+//                sendMessageToActivity("1");
+//            }
+//
+//            last_x = x;
+//            last_y = y;
+//            last_z = z;
+//
+//            String s = "X: " + last_x + "  Y: " + last_y + "  Z: " + last_z;
 
 //            Log.d("ACC vals", "X: " + last_x + "  Y: " + last_y + "  Z: " + last_z);
 
-        }
+            sendMessageToActivity(x,y,z);
+
+//        }
 
 
     }
 
-    private static void sendMessageToActivity(String msg) {
+    private static void sendMessageToActivity(float x, float y, float z) {
         Intent intent = new Intent("accData");
         // You can also include some extra data.
-        intent.putExtra("Status", msg);
+        intent.putExtra("X", x);
+        intent.putExtra("Y", y);
+        intent.putExtra("Z", z);
+
         Bundle b = new Bundle();
         LocalBroadcastManager.getInstance(context.getApplicationContext()).sendBroadcast(intent);
     }

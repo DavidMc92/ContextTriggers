@@ -21,6 +21,9 @@ public class AccelerometerTrigger extends BroadcastReceiver {
     private Context context;
     private int mId = 0;
     private static String GROUP = "Group";
+    private float last_x, last_y, last_z = 0;
+    private long lastUpdate = 0L;
+    private int SHAKE_THRESHOLD = 600;
 
     public AccelerometerTrigger(Context context)
     {
@@ -35,8 +38,31 @@ public class AccelerometerTrigger extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         // Get extra data included in the Intent
-        String message = intent.getStringExtra("Status");
-        stepCount += Integer.parseInt(message);
+//        String message = intent.getStringExtra("Status");
+        float x = intent.getFloatExtra("X", -1);
+        float y = intent.getFloatExtra("Y",-1);
+        float z = intent.getFloatExtra("Z",-1);
+
+        long curTime = System.currentTimeMillis();
+
+        if ((curTime - lastUpdate) > 100) {
+            long diffTime = (curTime - lastUpdate);
+            lastUpdate = curTime;
+
+            float speed = Math.abs(x + y + z - last_x - last_y - last_z) / diffTime * 10000;
+//
+            if (speed > SHAKE_THRESHOLD) {
+                stepCount++;
+            }
+
+            last_x = x;
+            last_y = y;
+            last_z = z;
+        }
+//
+//            String s = "X: " + last_x + "  Y: " + last_y + "  Z: " + last_z;
+
+//            Log.d("ACC vals", "X: " + last_x + "  Y: " + last_y + "  Z: " + last_z);
 
         if(stepCount==5)
         {

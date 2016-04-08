@@ -111,14 +111,14 @@ public class BarometerService extends Service implements SensorEventListener {
 
         float value = event.values[0];
 
-        sendMessageToActivity(String.valueOf(value));
+        sendMessageToActivity(value);
 
     }
 
-    private static void sendMessageToActivity(String msg) {
+    private static void sendMessageToActivity(float value) {
         Intent intent = new Intent("barData");
         // You can also include some extra data.
-        intent.putExtra("Status", msg);
+        intent.putExtra("BarVal", value);
         LocalBroadcastManager.getInstance(context.getApplicationContext()).sendBroadcast(intent);
     }
 }

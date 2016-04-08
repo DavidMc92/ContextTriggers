@@ -13,14 +13,27 @@ import android.util.Log;
 import com.example.davidmcnicol.contexttrigger.Activity.Services.Services.BarometerService;
 import com.example.davidmcnicol.contexttrigger.R;
 
+import java.util.ArrayList;
+
 /**
  * Created by davidmcnicol on 18/03/16.
  */
 public class BarometerTrigger extends BroadcastReceiver {
 
-    private double barValue = 0.0;
+    private float barValue = 0;
     private int mId = 0;
     private Context context;
+    private float x, y, z = 0;
+    private Boolean isAccValSmall, hasNotified = false;
+    private static float defaultAltitude = 1016f; // Default air pressure at sea level.
+    private ArrayList<Float> barValues = new ArrayList<>();
+    private float currentAltitude = 0;
+    private float prevAltitude = 0;
+    private float altitude = 0;
+    private int arrayPos;
+    private int MAX_ARRAY_SIZE = 20;
+
+    private ArrayList<Float> barometerValuesDifference = new ArrayList<>();
 
     public BarometerTrigger(Context context)
     {
@@ -30,23 +43,79 @@ public class BarometerTrigger extends BroadcastReceiver {
         LocalBroadcastManager.getInstance(context).registerReceiver(
                 this, new IntentFilter("barData"));
 
+        LocalBroadcastManager.getInstance(context).registerReceiver(
+                mMessageReceiver, new IntentFilter("accData"));
+
         context.startService(new Intent(context, BarometerService.class));
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
         // Get extra data included in the Intent
-        String message = intent.getStringExtra("Status");
-        barValue = Integer.parseInt(message);
+        barValue = intent.getFloatExtra("BarVal",-1);
 
-        Log.d("Barometer", message);
+        barValues.add(barValue);
 
-//        if(barValue >1000)
-//        {
-//            sendNotification(context,"Lift","Barometer Pressure High");
-//        }
+        currentAltitude = (defaultAltitude - currentAltitude) * 8;
+
+
+        if(isAccValSmall)
+        {
+            altitude = prevAltitude - currentAltitude;
+            if (altitude < 1 && altitude > -1) {
+                //Log.v("altitude", "" + altitude);
+                barometerValuesDifference.set(arrayPos, altitude);
+                arrayPos++;
+            }
+
+            if (arrayPos >= MAX_ARRAY_SIZE) {
+                //Log.v("HERE","RESET array pos");
+                arrayPos = 0;
+            }
+
+            if (barometerValuesDifference.size() >= MAX_ARRAY_SIZE) {
+
+                int sumBarValues = 0;
+                for (int i = 0; i < barometerValuesDifference.size(); i++) {
+                    //Log.v("averageBarometerDifference", "" + averageBarometerDifference);
+                    sumBarValues += barometerValuesDifference.get(i);
+                }
+
+                int averageBarValues = sumBarValues / barometerValuesDifference.size();
+                if (averageBarValues >= 0.02 || averageBarValues <= -0.02) {
+                    //Lift Detected so send notification
+                    if(!hasNotified) {
+                        sendNotification(context, "Left Detected", "In future why not take the stairs to use more energy.");
+                        hasNotified = true;
+                    }
+                    else
+                    {
+                        hasNotified = false;
+                    }
+                }
+
+            }
+
+        }
+
 
     }
+
+        private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Get extra data included in the Intent
+            x = intent.getFloatExtra("X",-1);
+            y = intent.getFloatExtra("Y",-1);
+            z = intent.getFloatExtra("Z",-1);
+
+            if( x < 15 && y < 15 && z < 15)
+            {
+                isAccValSmall = true;
+            }
+
+        }
+    };
 
 
     public void sendNotification(Context context, String title, String message)

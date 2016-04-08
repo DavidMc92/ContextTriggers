@@ -134,7 +134,7 @@ public class GeofencingService extends Service {
 
     private static void sendMessageToActivity(String msg) {
 
-        Intent intent = new Intent("calData");
+        Intent intent = new Intent("geoData");
         // You can also include some extra data.
         intent.putExtra("Status", msg);
         LocalBroadcastManager.getInstance(context.getApplicationContext()).sendBroadcast(intent);

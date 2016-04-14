@@ -13,10 +13,8 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.widget.Toast;
 
-/**
- * Created by Sean on 13/04/2016.
- */
 public abstract class SensorService extends BackgroundService implements SensorEventListener {
     private static final int SCREEN_OFF_RECEIVER_DELAY = 500;
 
@@ -29,13 +27,14 @@ public abstract class SensorService extends BackgroundService implements SensorE
         this.sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         this.broadcastReceiver = new CustomBroadcastReceiver();
         registerReceiver(this.broadcastReceiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
+
+        Toast.makeText(getApplicationContext(), "Starting service!", Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public final void onSensorChanged(SensorEvent event) {
-        final Intent intent = new Intent("SENSOR_DATA");
-        onSensorChanged(event, intent);
-        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+        LocalBroadcastManager.getInstance(getApplicationContext()).
+                                            sendBroadcast(sensorChanged(event));
     }
 
     @Override
@@ -44,7 +43,7 @@ public abstract class SensorService extends BackgroundService implements SensorE
     // Defer registration of a particular sensor to the child service
     protected abstract void registerSensorListener(SensorManager sm);
     protected abstract void unregisterSensorListener(SensorManager sm);
-    protected abstract void onSensorChanged(SensorEvent event, Intent intent);
+    protected abstract Intent sensorChanged(SensorEvent event);
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -61,6 +60,8 @@ public abstract class SensorService extends BackgroundService implements SensorE
         if(this.sensorManager != null){
             unregisterSensorListener(this.sensorManager);
         }
+
+        Toast.makeText(getApplicationContext(), "Stopping service!", Toast.LENGTH_SHORT).show();
     }
 
     @Nullable
@@ -69,7 +70,7 @@ public abstract class SensorService extends BackgroundService implements SensorE
         return null;
     }
 
-    private class CustomBroadcastReceiver extends BroadcastReceiver{
+    private final class CustomBroadcastReceiver extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent) {
             if(intent.getAction().equals(Intent.ACTION_SCREEN_OFF)){

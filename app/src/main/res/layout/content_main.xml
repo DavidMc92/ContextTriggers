@@ -15,5 +15,49 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!" />
+        android:text="Accelerometer"
+        android:textSize="24sp"
+        android:id="@+id/textView"
+        android:layout_marginTop="20sp"
+        android:layout_marginStart="20sp"
+        android:layout_marginLeft="20sp"
+        android:layout_alignParentLeft="true"/>
+
+
+    <Switch
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/switchAcc"
+        android:layout_marginTop="20sp"
+        android:layout_marginEnd="20sp"
+        android:layout_marginRight="20sp"
+        android:layout_alignParentRight="true"
+        android:layout_toRightOf="@+id/textView"/>
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Barometer"
+        android:textSize="24sp"
+        android:id="@+id/textViewBarometer"
+        android:layout_marginTop="20sp"
+        android:layout_marginStart="20sp"
+        android:layout_marginLeft="20sp"
+        android:layout_below="@+id/textView"
+        android:layout_alignParentLeft="true"/>
+
+
+    <Switch
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/switchBar"
+        android:layout_marginTop="20sp"
+        android:layout_marginEnd="20sp"
+        android:layout_marginRight="20sp"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/switchAcc"
+        android:layout_toRightOf="@+id/textViewBarometer"/>
+
 </RelativeLayout>
+

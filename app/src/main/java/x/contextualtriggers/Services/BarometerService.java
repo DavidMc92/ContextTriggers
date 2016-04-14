@@ -5,17 +5,18 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
 
-/**
- * Created by Sean on 13/04/2016.
- */
 public class BarometerService extends SensorService {
+    public static final String BAROMETER_INTENT = "DATA_BAROMETER";
+
     public static final String BAROM_KEY = "BAROMETER_VAL";
 
     @Override
-    protected void onSensorChanged(SensorEvent event, Intent intent) {
+    protected Intent sensorChanged(SensorEvent event) {
+        final Intent ret = new Intent(BAROMETER_INTENT);
         if(event.values.length >= 1){
-            intent.putExtra(BAROM_KEY, event.values[0]);
+            ret.putExtra(BAROM_KEY, event.values[0]);
         }
+        return ret;
     }
 
     @Override

@@ -1,16 +1,12 @@
 package x.contextualtriggers.Services;
 
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
 
-/**
- * Created by Sean on 13/04/2016.
- */
 public abstract class BackgroundService extends Service {
     private PowerManager.WakeLock mWakeLock;
 
@@ -22,7 +18,6 @@ public abstract class BackgroundService extends Service {
             this.mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                     this.getClass().getSimpleName());
         }
-        //registerReceiver()
     }
 
     @Override
@@ -48,10 +43,4 @@ public abstract class BackgroundService extends Service {
         return null;
     }
 
-    private class CustomBroadcastReceiver extends BroadcastReceiver{
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-        }
-    }
 }

@@ -42,9 +42,9 @@ public class WeatherService extends BackgroundService {
 
     private String fetchWeather() {
         String response = null;
-        // TODO Check if currently have network access as well!
+        // Check if permitted to access the internet and network available
         if(ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.INTERNET)
-                == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                == android.content.pm.PackageManager.PERMISSION_GRANTED && ServiceHelper.isNetworkAvailable(this)) {
 
             HttpURLConnection connection = null;
             BufferedReader reader = null;

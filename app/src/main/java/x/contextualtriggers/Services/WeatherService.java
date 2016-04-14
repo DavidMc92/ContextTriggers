@@ -17,6 +17,7 @@ import java.net.URL;
 
 import x.contextualtriggers.MessageObjects.IWeatherInfo;
 import x.contextualtriggers.MessageObjects.WeatherInfo;
+import x.contextualtriggers.MessageObjects.WeatherType;
 
 public class WeatherService extends BackgroundService {
     public static final String WEATHER_INTENT = "DATA_WEATHER",
@@ -81,31 +82,89 @@ public class WeatherService extends BackgroundService {
         return response;
     }
 
+    // JSON Information:        http://openweathermap.org/current
+    // WeatherType Information: http://openweathermap.org/weather-conditions
     private IWeatherInfo processWeather(final String weather){
         final WeatherInfo.WeatherInfoBuilder builder = new WeatherInfo.WeatherInfoBuilder();
         if(weather != null) {
             try {
                 // parse the json result returned from the service
-                JSONObject jsonResult = new JSONObject(weather);
+                final JSONObject jsonResult = new JSONObject(weather);
 
                 // parse out the temperature from the JSON result
-                double temperature = jsonResult.getJSONObject("main").getDouble("temp");
-                builder.setTemperature(temperature);
+                double val = jsonResult.getJSONObject("main").getDouble("temp") - 273.0;
+                builder.setTemperature(val);
 
                 // parse out the pressure from the JSON Result
-                double pressure = jsonResult.getJSONObject("main").getDouble("pressure");
-                builder.setPressure(pressure);
+                val = jsonResult.getJSONObject("main").getDouble("pressure");
+                builder.setPressure(val);
 
                 // parse out the humidity from the JSON result
-                double humidity = jsonResult.getJSONObject("main").getDouble("humidity");
-                builder.setHumidity(humidity);
+                val = jsonResult.getJSONObject("main").getDouble("humidity");
+                builder.setHumidity(val);
 
-                String description = jsonResult.getJSONArray("weather").getJSONObject(0).getString("description");
-                builder.setWeatherDescription(description);
+                // parse out the current weather from the JSON result
+                final WeatherType type = processWeatherType(
+                        jsonResult.getJSONArray("weather").getJSONObject(0).getString("main"));
+                builder.setWeather(type);
+
+                // parse out the detailed weather description from the JSON result
+                final String desc = jsonResult.getJSONArray("weather").getJSONObject(0).
+                        getString("description");
+                builder.setWeatherDescription(desc);
+
+                // parse out the wind speed from the JSON result
+                val = jsonResult.getJSONObject("wind").getDouble("speed");
+                builder.setWindSpeed(val);
+
+                // parse out the wind direction from the JSON result
+                val = jsonResult.getJSONObject("wind").getDouble("deg");
+                builder.setWindDirection(val);
+
+                // Either of the next parameters could result in a JSONException if they have not
+                // occurred in the local area for the day
+
+                // parse out the cloudiness from the JSON result
+                val = jsonResult.getJSONObject("clouds").getDouble("all");
+                builder.setCloudiness(val);
+
+                // parse out the rain volume over the past three hours from the JSON result
+                val = jsonResult.getJSONObject("rain").getDouble("3h");
+                builder.setRainVolume(val);
             }
             catch(JSONException json){}
         }
         return builder.build();
+    }
+
+    private WeatherType processWeatherType(final String description){
+        WeatherType ret = WeatherType.OTHER;
+        switch(description){
+            case "Thunderstorm":    ret = WeatherType.THUNDERSTORM;
+                                    break;
+
+            case "Drizzle":         ret = WeatherType.DRIZZLE;
+                                    break;
+
+            case "Rain":            ret = WeatherType.RAIN;
+                                    break;
+
+            case "Snow":            ret = WeatherType.SNOW;
+                                    break;
+
+            case "Atmosphere":      ret = WeatherType.ATMOSPHERE;
+                                    break;
+
+            case "Clear":           ret = WeatherType.CLEAR;
+                                    break;
+
+            case "Clouds":          ret = WeatherType.CLOUDS;
+                                    break;
+
+            case "Extreme":         ret = WeatherType.EXTREME;
+                                    break;
+        }
+        return ret;
     }
 
     private void broadcastWeather(IWeatherInfo info){

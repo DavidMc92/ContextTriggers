@@ -7,8 +7,19 @@ import android.os.Parcelable;
  */
 public interface IWeatherInfo extends Parcelable {
     double getTemperature();    // Celsius
-    double getPressure();       // Pascals
-    double getHumidity();       // Grams / metre cubed ?
+    double getPressure();       // HectoPascals
+
+    double getHumidity();       // Percentage
+
+    double getWindSpeed();      // Metres / seconds
+    double getWindDirection();  // Degress (meteorological)
+
+    double getCloudiness();     // Percentage
+
+    double getRainVolume();     // Volume over last three hours
+
+    WeatherType getWeather();   // Enum representation of weather
 
     String getWeatherDescription(); // For now; will work on better description
 }
+

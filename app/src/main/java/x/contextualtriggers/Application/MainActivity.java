@@ -1,9 +1,5 @@
 package x.contextualtriggers.Application;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -11,18 +7,25 @@ import android.view.Menu;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import x.contextualtriggers.R;
-import x.contextualtriggers.Services.AccelerometerService;
-import x.contextualtriggers.Services.BarometerService;
-import x.contextualtriggers.Services.WeatherService;
+import x.contextualtriggers.Triggers.ElevatorDetectorTrigger;
+import x.contextualtriggers.Triggers.ITrigger;
+import x.contextualtriggers.Triggers.LunchTimeLocatorTrigger;
+import x.contextualtriggers.Triggers.PedometerPrompterTrigger;
+import x.contextualtriggers.Triggers.RouteRecommenderTrigger;
 import x.contextualtriggers.Triggers.TriggerManager;
 
 public class MainActivity extends AppCompatActivity {
-
-    private Switch accSwitch, barSwitch, weatherSwitch;
-    private AlarmManager alarmManager;
+    private Switch elevSwitch, lunchSwitch, pedSwitch, routeSwitch;
 
     private TriggerManager triggerManager;
+    private Map<Integer, ITrigger> triggerMap; // TODO Change to Set; need to lookup proper equals()
+
+    private List<ITrigger> triggers;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,85 +34,72 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        this.triggerManager = new TriggerManager();
-        this.alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        this.triggerManager = new TriggerManager(this);
+        this.triggerMap = new HashMap<>();
 
-        accSwitch = (Switch) findViewById(R.id.switchAcc);
-        accSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        this.elevSwitch = (Switch) findViewById(R.id.switchElev);
+        this.elevSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked){
-                    startService(new Intent(getApplicationContext(),
-                            AccelerometerService.class));
+                if(isChecked && !triggerMap.containsKey(0)){
+                    final ITrigger trigger = new ElevatorDetectorTrigger(getApplicationContext());
+                    triggerManager.enableTrigger(trigger);
+                    triggerMap.put(0, trigger);
                 }
-                else{
-                    stopService(new Intent(getApplicationContext(), AccelerometerService.class));
+                else if(triggerMap.containsKey(0)){
+                    final ITrigger trigger = triggerMap.remove(0);
+                    triggerManager.disableTrigger(trigger);
                 }
-                triggerManager.checkTriggerConditions(getApplicationContext(),
-                        isChecked,
-                        barSwitch.isChecked(),
-                        weatherSwitch.isChecked());
             }
         });
 
-        barSwitch = (Switch) findViewById(R.id.switchBar);
-        barSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        this.lunchSwitch = (Switch) findViewById(R.id.switchLunch);
+        this.lunchSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked){
-                    startService(new Intent(getApplicationContext(),
-                            BarometerService.class));
+                if(isChecked && !triggerMap.containsKey(1)){
+                    final ITrigger trigger = new LunchTimeLocatorTrigger(getApplicationContext());
+                    triggerManager.enableTrigger(trigger);
+                    triggerMap.put(1, trigger);
                 }
-                else{
-                    stopService(new Intent(getApplicationContext(), BarometerService.class));
+                else if(triggerMap.containsKey(1)){
+                    final ITrigger trigger = triggerMap.remove(1);
+                    triggerManager.disableTrigger(trigger);
                 }
-                triggerManager.checkTriggerConditions(getApplicationContext(),
-                        accSwitch.isChecked(),
-                        isChecked,
-                        weatherSwitch.isChecked());
             }
         });
 
-        weatherSwitch = (Switch) findViewById(R.id.switchWeather);
-        weatherSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        this.pedSwitch = (Switch) findViewById(R.id.switchPed);
+        this.pedSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked){
-                    startService(new Intent(getApplicationContext(),
-                            WeatherService.class));
-                    // TODO Set proper time, i.e. AlarmManager.INTERVAL_FIFTEEN_MINUTES
-                    // Use this to schedule a child of BackgroundService
-                    scheduleAlarm(WeatherService.class, 500);
+                if(isChecked && !triggerMap.containsKey(2)){
+                    final ITrigger trigger = new PedometerPrompterTrigger(getApplicationContext());
+                    triggerManager.enableTrigger(trigger);
+                    triggerMap.put(2, trigger);
                 }
-                else{
-                    stopService(new Intent(getApplicationContext(), WeatherService.class));
-                    unscheduleAlarm(WeatherService.class);
+                else if(triggerMap.containsKey(2)){
+                    final ITrigger trigger = triggerMap.remove(2);
+                    triggerManager.disableTrigger(trigger);
                 }
-                triggerManager.checkTriggerConditions(getApplicationContext(),
-                        accSwitch.isChecked(),
-                        barSwitch.isChecked(),
-                        isChecked);
             }
         });
-    }
 
-    private void scheduleAlarm(Class clz, long period){
-        if(this.alarmManager != null) {
-            final Intent intent = new Intent(getApplicationContext(), clz);
-            final PendingIntent pi = PendingIntent.getService(this, 0, intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT);
-            long trigger = System.currentTimeMillis() + 500;
-            alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, trigger, period, pi);
-        }
-    }
-
-    private void unscheduleAlarm(Class clz){
-        if(this.alarmManager != null){
-            final Intent intent = new Intent(getApplicationContext(), clz);
-            final PendingIntent pi = PendingIntent.getService(this, 0, intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT);
-            alarmManager.cancel(pi);
-        }
+        this.routeSwitch = (Switch) findViewById(R.id.switchRoute);
+        this.routeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked && !triggerMap.containsKey(3)){
+                    final ITrigger trigger = new RouteRecommenderTrigger(getApplicationContext());
+                    triggerManager.enableTrigger(trigger);
+                    triggerMap.put(3, trigger);
+                }
+                else if(triggerMap.containsKey(3)){
+                    final ITrigger trigger = triggerMap.remove(3);
+                    triggerManager.disableTrigger(trigger);
+                }
+            }
+        });
     }
 
     @Override
@@ -123,19 +113,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        this.triggerManager.checkTriggerConditions(getApplicationContext(),
-                accSwitch.isChecked(),
-                barSwitch.isChecked(),
-                weatherSwitch.isChecked());
     }
 
     // For destroying broadcast receivers + preventing dangling references
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        this.triggerManager.checkTriggerConditions(getApplicationContext(),
-                false,
-                false,
-                false);
     }
 }

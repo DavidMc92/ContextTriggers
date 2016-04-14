@@ -15,73 +15,95 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Accelerometer"
+        android:text="Elevator Detector"
         android:textSize="24sp"
-        android:id="@+id/textView"
+        android:id="@+id/textViewElev"
         android:layout_marginTop="20sp"
         android:layout_marginStart="20sp"
         android:layout_marginLeft="20sp"
         android:layout_alignParentLeft="true"/>
 
-
     <Switch
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/switchAcc"
+        android:id="@+id/switchElev"
         android:layout_marginTop="20sp"
         android:layout_marginEnd="20sp"
         android:layout_marginRight="20sp"
         android:layout_alignParentRight="true"
-        android:layout_toRightOf="@+id/textView"/>
-
+        android:layout_toRightOf="@+id/textViewElev"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Barometer"
+        android:text="Lunch Time Locator"
         android:textSize="24sp"
-        android:id="@+id/textViewBarometer"
+        android:id="@+id/textViewLunch"
         android:layout_marginTop="20sp"
         android:layout_marginStart="20sp"
         android:layout_marginLeft="20sp"
-        android:layout_below="@+id/textView"
+        android:layout_below="@+id/textViewElev"
         android:layout_alignParentLeft="true"/>
 
 
     <Switch
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/switchBar"
+        android:id="@+id/switchLunch"
         android:layout_marginTop="20sp"
         android:layout_marginEnd="20sp"
         android:layout_marginRight="20sp"
         android:layout_alignParentRight="true"
-        android:layout_below="@+id/switchAcc"
-        android:layout_toRightOf="@+id/textViewBarometer"/>
+        android:layout_below="@+id/textViewElev"
+        android:layout_toRightOf="@+id/textViewLunch"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Weather"
+        android:text="Pedometer Prompter"
         android:textSize="24sp"
-        android:id="@+id/textViewWeather"
+        android:id="@+id/textViewPed"
         android:layout_marginTop="20sp"
         android:layout_marginStart="20sp"
         android:layout_marginLeft="20sp"
-        android:layout_below="@+id/textViewBarometer"
+        android:layout_below="@+id/textViewLunch"
         android:layout_alignParentLeft="true"/>
 
 
     <Switch
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/switchWeather"
+        android:id="@+id/switchPed"
         android:layout_marginTop="20sp"
         android:layout_marginEnd="20sp"
         android:layout_marginRight="20sp"
         android:layout_alignParentRight="true"
-        android:layout_below="@+id/switchBar"
-        android:layout_toRightOf="@+id/textViewWeather"/>
+        android:layout_below="@+id/textViewLunch"
+        android:layout_toRightOf="@+id/textViewPed"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Route Recommender"
+        android:textSize="24sp"
+        android:id="@+id/textViewRoute"
+        android:layout_marginTop="20sp"
+        android:layout_marginStart="20sp"
+        android:layout_marginLeft="20sp"
+        android:layout_below="@+id/textViewPed"
+        android:layout_alignParentLeft="true"/>
+
+
+    <Switch
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/switchRoute"
+        android:layout_marginTop="20sp"
+        android:layout_marginEnd="20sp"
+        android:layout_marginRight="20sp"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/textViewPed"
+        android:layout_toRightOf="@+id/textViewRoute"/>
 
 </RelativeLayout>
 

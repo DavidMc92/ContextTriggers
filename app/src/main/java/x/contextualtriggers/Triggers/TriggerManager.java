@@ -2,22 +2,40 @@ package x.contextualtriggers.Triggers;
 
 import android.content.Context;
 
-/**
- * Created by Sean on 13/04/2016.
- */
 public class TriggerManager {
-    private ElevatorTrigger et;
+    private ITrigger et;
 
-    public void checkTriggerConditions(Context ctx, boolean accelEnabled, boolean barEnabled){
+    public void checkTriggerConditions(Context ctx, boolean accelEnabled, boolean barEnabled,
+                                       boolean weatherEnabled){
         manageElevatorTrigger(ctx, accelEnabled, barEnabled);
+        manageLunchTrigger(ctx);
+        managePedometerTrigger(ctx);
+        manageRouteTrigger(ctx);
     }
 
     private void manageElevatorTrigger(Context ctx, boolean accelEnabled, boolean barEnabled){
         if(accelEnabled && barEnabled && et == null){
-            et = new ElevatorTrigger(ctx);
+            et = new ElevatorDetectorTrigger(ctx);
+            et.registerReceivers(ctx);
         }
-        else{
+        else if(et != null){
+            et.unregisterReceivers(ctx);
             et = null;
         }
+    }
+
+    // TODO
+    private void manageLunchTrigger(Context ctx){
+
+    }
+
+    // TODO
+    private void managePedometerTrigger(Context ctx){
+
+    }
+
+    // TODO
+    private void manageRouteTrigger(Context ctx){
+
     }
 }

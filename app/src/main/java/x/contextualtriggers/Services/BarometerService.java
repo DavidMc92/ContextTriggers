@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
+import android.widget.Toast;
 
 public class BarometerService extends SensorService {
     public static final String BAROMETER_INTENT = "DATA_BAROMETER";
@@ -24,6 +25,10 @@ public class BarometerService extends SensorService {
         final Sensor sensor = sm.getDefaultSensor(Sensor.TYPE_PRESSURE);
         if(sensor != null) {
             sm.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
+        }
+        else{
+            Toast.makeText(getApplicationContext(), "No barometer on device!",
+                                Toast.LENGTH_SHORT).show();
         }
     }
 

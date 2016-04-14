@@ -16,9 +16,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class CalendarService extends BackgroundService implements ICalendarService {
-
+// TODO Figure out when to start/finish etc
+public class CalendarService extends BackgroundService {
     private final IBinder mBinder = new LocalBinder();
+
+    public CalendarService(String name) {
+        super(name);
+    }
 
     /** A client is binding to the service with bindService() */
     @Override
@@ -27,7 +31,7 @@ public class CalendarService extends BackgroundService implements ICalendarServi
     }
 
     @Override
-    public List<String> getCalendarEvents() {
+    protected void onHandleIntent(Intent intent) {
         final List<String> ret = new ArrayList<>();
 
         if(ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_CALENDAR)
@@ -46,8 +50,8 @@ public class CalendarService extends BackgroundService implements ICalendarServi
             ContentUris.appendId(eventsUriBuilder, now + (DateUtils.DAY_IN_MILLIS / 2));
 
             final Cursor eventCursor = contentResolver.query(eventsUriBuilder.build(),
-                                                                EVENT_PROJECTION,
-                                                                    null, null, null);
+                    EVENT_PROJECTION,
+                    null, null, null);
             while(eventCursor.moveToNext()){
                 ret.add(new StringBuilder().append("Title: " + eventCursor.getString(0))
                         .append(" Location: " + eventCursor.getString(1))
@@ -57,7 +61,8 @@ public class CalendarService extends BackgroundService implements ICalendarServi
                         .toString());
             }
         }
-        return ret;
+
+        //return ret;
     }
 
     public final class LocalBinder extends Binder {

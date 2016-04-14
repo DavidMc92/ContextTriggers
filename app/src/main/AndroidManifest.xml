@@ -15,7 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
+            android:name=".Application.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -24,8 +24,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:enabled="true" android:name="x.contextualtriggers.Services.AccelerometerService" />
-        <service android:enabled="true" android:name="x.contextualtriggers.Services.BarometerService" />
+
+        <receiver android:name=".Services.SensorService$ServiceRestartBroadcastReceiver"/>
+
+        <service android:enabled="true" android:name=".Services.AccelerometerService" />
+        <service android:enabled="true" android:name=".Services.BarometerService" />
+        <service android:enabled="true" android:name=".Services.WeatherService" />
+
     </application>
 
 </manifest>

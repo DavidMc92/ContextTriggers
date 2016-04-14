@@ -1,18 +1,14 @@
 package x.contextualtriggers.Services;
 
-import android.app.IntentService;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
 
-public abstract class BackgroundService extends IntentService {
+public abstract class IntensiveService extends Service {
     private PowerManager.WakeLock mWakeLock;
-
-    public BackgroundService(String name) {
-        super(name);
-    }
 
     @Override
     public void onCreate() {

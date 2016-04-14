@@ -13,9 +13,8 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.widget.Toast;
 
-public abstract class SensorService extends BackgroundService implements SensorEventListener {
+public abstract class SensorService extends IntensiveService implements SensorEventListener {
     private static final int SCREEN_OFF_RECEIVER_DELAY = 500;
 
     private SensorManager sensorManager;
@@ -25,10 +24,8 @@ public abstract class SensorService extends BackgroundService implements SensorE
     public void onCreate() {
         super.onCreate();
         this.sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        this.broadcastReceiver = new CustomBroadcastReceiver();
+        this.broadcastReceiver = new ServiceRestartBroadcastReceiver();
         registerReceiver(this.broadcastReceiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
-
-        Toast.makeText(getApplicationContext(), "Starting service!", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -60,8 +57,6 @@ public abstract class SensorService extends BackgroundService implements SensorE
         if(this.sensorManager != null){
             unregisterSensorListener(this.sensorManager);
         }
-
-        Toast.makeText(getApplicationContext(), "Stopping service!", Toast.LENGTH_SHORT).show();
     }
 
     @Nullable
@@ -70,11 +65,12 @@ public abstract class SensorService extends BackgroundService implements SensorE
         return null;
     }
 
-    private final class CustomBroadcastReceiver extends BroadcastReceiver{
+    // Desire service to continue even when device has turned off
+    public final class ServiceRestartBroadcastReceiver extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent) {
             if(intent.getAction().equals(Intent.ACTION_SCREEN_OFF)){
-                Log.d(this.getClass().getSimpleName(), "Screen off action!");
+                Log.d(getClass().getSimpleName(), "Screen off action!");
                 final Runnable toRun = new Runnable() {
                     @Override
                     public void run() {

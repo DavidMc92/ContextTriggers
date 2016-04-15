@@ -6,34 +6,36 @@ import android.content.ContentUris;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Binder;
-import android.os.IBinder;
 import android.provider.CalendarContract;
 import android.support.v4.content.ContextCompat;
-import android.text.format.DateUtils;
+import android.support.v4.content.LocalBroadcastManager;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-// TODO Figure out when to start/finish etc
+import x.contextualtriggers.MessageObjects.CalendarInfo;
+import x.contextualtriggers.MessageObjects.Event;
+import x.contextualtriggers.MessageObjects.ICalendarInfo;
+import x.contextualtriggers.MessageObjects.IEvent;
+import x.contextualtriggers.Misc.DateCreation;
+
 public class CalendarService extends BackgroundService {
-    private final IBinder mBinder = new LocalBinder();
 
-    public CalendarService(String name) {
-        super(name);
-    }
+    public static final String CALENDAR_INTENT = "DATA_CALENDAR",
+            CALENDAR_DATA = "CALENDAR_INFO";
 
-    /** A client is binding to the service with bindService() */
-    @Override
-    public IBinder onBind(Intent intent) {
-        return mBinder;
+    public CalendarService() {
+        super(CalendarService.class.getSimpleName());
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        final List<String> ret = new ArrayList<>();
+        broadcastTodaysInfo(getTodaysEvents());
+    }
 
+    private ICalendarInfo getTodaysEvents(){
+        final List<IEvent> eventList = new ArrayList<>();
         if(ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_CALENDAR)
                 == android.content.pm.PackageManager.PERMISSION_GRANTED){
             final ContentResolver contentResolver = getApplicationContext().getContentResolver();
@@ -45,30 +47,36 @@ public class CalendarService extends BackgroundService {
                     CalendarContract.Events.ALL_DAY};
 
             final  Uri.Builder eventsUriBuilder = CalendarContract.Instances.CONTENT_URI.buildUpon();
-            final long now = new Date().getTime();
-            ContentUris.appendId(eventsUriBuilder, now);
-            ContentUris.appendId(eventsUriBuilder, now + (DateUtils.DAY_IN_MILLIS / 2));
+
+            final Date now = new Date();
+            final long endOfDay = DateCreation.getEndOfDay(now).getTime();
+            ContentUris.appendId(eventsUriBuilder, now.getTime());
+            ContentUris.appendId(eventsUriBuilder, endOfDay);
 
             final Cursor eventCursor = contentResolver.query(eventsUriBuilder.build(),
                     EVENT_PROJECTION,
                     null, null, null);
             while(eventCursor.moveToNext()){
-                ret.add(new StringBuilder().append("Title: " + eventCursor.getString(0))
-                        .append(" Location: " + eventCursor.getString(1))
-                        .append(" Begin: " + new Date(eventCursor.getLong(2)).toString())
-                        .append(" End: " + new Date(eventCursor.getLong(3)).toString())
-                        .append(" All Day: " + !eventCursor.getString(4).equals("0"))
-                        .toString());
+                final Event.Builder builder = new Event.Builder()
+                                                    .setTitle(eventCursor.getString(0))
+                                                    .setLocation(eventCursor.getString(1))
+                                                    .setIsAllDay(!eventCursor.getString(4).equals("0"));
+
+                // Should always succeed but best to be careful
+                try{
+                    builder.setStart(new Date(Long.parseLong(eventCursor.getString(2))))
+                            .setEnd(new Date(Long.parseLong(eventCursor.getString(3))));
+                } catch(NumberFormatException nfe) {}
+
+                eventList.add(builder.build());
             }
         }
-
-        //return ret;
+        return new CalendarInfo(eventList);
     }
 
-    public final class LocalBinder extends Binder {
-        public CalendarService getService() {
-            // Return this instance of LocalService so clients can call public methods
-            return CalendarService.this;
-        }
+    private void broadcastTodaysInfo(ICalendarInfo info){
+        final Intent intent = new Intent(CALENDAR_INTENT);
+        intent.putExtra(CALENDAR_DATA, info);
+        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
     }
 }

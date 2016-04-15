@@ -21,22 +21,20 @@ import x.contextualtriggers.MessageObjects.WeatherType;
 
 public class WeatherService extends BackgroundService {
     public static final String WEATHER_INTENT = "DATA_WEATHER",
-                                WEATHER_DATA = "WEATHERINFO";
+                                WEATHER_DATA = "WEATHER_INFO";
 
-
-    private static final String NAME = "WeatherService";
     private static final String OPEN_WEATHER_MAP_API_KEY = "326a256e75a2b049deb89119dfb778bf";
 
     private static final String WEATHER_API_URL =
             "http://api.openweathermap.org/data/2.5/weather?q=glasgow,uk&APPID=" + OPEN_WEATHER_MAP_API_KEY ;
 
     public WeatherService() {
-        super(NAME);
+        super(WeatherService.class.getSimpleName());
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        Log.d(NAME, "Fetching the weather.");
+        Log.d(WeatherService.class.getSimpleName(), "Fetching the weather.");
         broadcastWeather(processWeather(fetchWeather()));
     }
 
@@ -65,7 +63,7 @@ public class WeatherService extends BackgroundService {
                 }
                 response = builder.toString();
             } catch (IOException e) {
-                Log.e(NAME, e.getMessage());
+                Log.e(WeatherService.class.getSimpleName(), e.getMessage());
             } finally {   // Remember to release resources
                 if (connection != null) {
                     connection.disconnect();
@@ -75,7 +73,7 @@ public class WeatherService extends BackgroundService {
                         reader.close();
                     }
                 } catch (IOException e) {
-                    Log.e(NAME, "Unable to release BufferedReader.");
+                    Log.e(WeatherService.class.getSimpleName(), "Unable to release BufferedReader.");
                 }
             }
         }

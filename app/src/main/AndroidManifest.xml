@@ -30,6 +30,7 @@
 
         <service android:enabled="true" android:name=".Services.AccelerometerService" />
         <service android:enabled="true" android:name=".Services.BarometerService" />
+        <service android:enabled="true" android:name=".Services.CalendarService" />
         <service android:enabled="true" android:name=".Services.WeatherService" />
 
     </application>

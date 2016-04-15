@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.CompoundButton;
 import android.widget.Switch;
+import android.widget.Toast;
 
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
@@ -33,7 +34,6 @@ import x.contextualtriggers.Triggers.TriggerManager;
 public class MainActivity extends AppCompatActivity {
     private static final String ACTIVITY_PREFERENCES =
             "x.contextualtriggers.Application.MainActivity$UserPreferenceActivity";
-
 
     private Switch elevSwitch, lunchSwitch, pedSwitch, routeSwitch;
 
@@ -109,14 +109,22 @@ public class MainActivity extends AppCompatActivity {
         this.routeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked && !triggerMap.containsKey(3)){
-                    final ITrigger trigger = new RouteRecommenderTrigger(getApplicationContext());
-                    triggerManager.enableTrigger(trigger);
-                    triggerMap.put(3, trigger);
+                if(prefs.getHomeAddress().equals("") ||  prefs.getWorkAddress().equals("")){
+                    Toast.makeText(getApplicationContext(),
+                            "Please specify your work and home locations using the Settings!",
+                            Toast.LENGTH_SHORT).show();
+                    routeSwitch.setChecked(false);
                 }
-                else if(triggerMap.containsKey(3)){
-                    final ITrigger trigger = triggerMap.remove(3);
-                    triggerManager.disableTrigger(trigger);
+                else {
+                    if(isChecked && !triggerMap.containsKey(3)){
+                        final ITrigger trigger = new RouteRecommenderTrigger(getApplicationContext());
+                        triggerManager.enableTrigger(trigger);
+                        triggerMap.put(3, trigger);
+                    }
+                    else if(triggerMap.containsKey(3)){
+                        final ITrigger trigger = triggerMap.remove(3);
+                        triggerManager.disableTrigger(trigger);
+                    }
                 }
             }
         });

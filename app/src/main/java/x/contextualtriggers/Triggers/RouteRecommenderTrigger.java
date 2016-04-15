@@ -8,11 +8,14 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Pair;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import x.contextualtriggers.Application.NotificationSender;
+import x.contextualtriggers.MessageObjects.CalendarInfo;
 import x.contextualtriggers.MessageObjects.ICalendarInfo;
 import x.contextualtriggers.MessageObjects.IWeatherInfo;
+import x.contextualtriggers.MessageObjects.WeatherType;
 import x.contextualtriggers.R;
 import x.contextualtriggers.Services.CalendarService;
 import x.contextualtriggers.Services.WeatherService;
@@ -23,6 +26,7 @@ public class RouteRecommenderTrigger extends BroadcastReceiver implements ITrigg
 
     private final Context context;
 
+    // Info from appropriate services allowing action
     private IWeatherInfo lastWeatherInfo;
     private ICalendarInfo lastCalendarInfo;
 
@@ -40,12 +44,19 @@ public class RouteRecommenderTrigger extends BroadcastReceiver implements ITrigg
             this.lastCalendarInfo = intent.getParcelableExtra(CalendarService.CALENDAR_DATA);
         }
 
-        // Check if the conditions are valid
-        if(lastWeatherInfo != null){
-            NotificationSender.sendNotification(context, NOTIFICATION_ID,
-                    R.drawable.ic_directions_walk_white_18dp,
-                    RouteRecommenderTrigger.class.getSimpleName(),
-                    "Rar");
+        // Check if all needed info has been delivered
+        if(this.lastWeatherInfo != null && this.lastCalendarInfo != null){
+            boolean isSuitableWeather = this.lastWeatherInfo.getWeather() == WeatherType.CLOUDS ||
+                                        this.lastWeatherInfo.getWeather() == WeatherType.CLEAR;
+            boolean isUserAvailable = CalendarInfo.isUserFree(this.lastCalendarInfo.getCalendarEvents(),
+                    new Date().getTime());
+
+            if(isSuitableWeather && isUserAvailable){
+                NotificationSender.sendNotification(context, NOTIFICATION_ID,
+                        R.drawable.ic_directions_walk_white_18dp,
+                        RouteRecommenderTrigger.class.getSimpleName(),
+                        "Do something, it's a nice day!");
+            }
         }
     }
 

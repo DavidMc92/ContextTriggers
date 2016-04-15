@@ -1,9 +1,13 @@
 package x.contextualtriggers.Application;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceActivity;
+import android.preference.PreferenceFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 
@@ -20,6 +24,10 @@ import x.contextualtriggers.Triggers.RouteRecommenderTrigger;
 import x.contextualtriggers.Triggers.TriggerManager;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String ACTIVITY_PREFERENCES =
+            "x.contextualtriggers.Application.MainActivity$UserPreferenceActivity";
+
+
     private Switch elevSwitch, lunchSwitch, pedSwitch, routeSwitch;
 
     private TriggerManager triggerManager;
@@ -119,5 +127,40 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        boolean ret;
+        switch(id){
+            case R.id.action_settings:
+                Intent intent = new Intent().setClassName(this, ACTIVITY_PREFERENCES);
+                startActivity(intent);
+                ret = true;
+                break;
+
+            default:
+                ret = super.onOptionsItemSelected(item);
+                break;
+        }
+
+        return ret;
+    }
+
+    public static class UserPreferenceActivity extends PreferenceActivity {
+        @Override
+        protected void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            getFragmentManager().beginTransaction().replace(android.R.id.content, new UserPreferenceFragment()).commit();
+        }
+
+        public static class UserPreferenceFragment extends PreferenceFragment {
+            @Override
+            public void onCreate(final Bundle savedInstanceState){
+                super.onCreate(savedInstanceState);
+                addPreferencesFromResource(R.xml.user_settings);
+            }
+        }
     }
 }

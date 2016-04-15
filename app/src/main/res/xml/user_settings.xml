@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+        <PreferenceCategory android:title="Location Information">
+            <CheckBoxPreference
+                android:title="Home Location"
+                android:defaultValue="false"
+                android:key="Home Location"
+                android:summary="Set the postcode of your home address."
+                />
+
+            <CheckBoxPreference
+                android:title="Work Location"
+                android:defaultValue="false"
+                android:key="Work Location"
+                android:summary="Set the postcode of your work address."
+                />
+        </PreferenceCategory>
+</PreferenceScreen>

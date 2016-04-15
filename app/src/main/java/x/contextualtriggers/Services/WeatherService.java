@@ -2,9 +2,15 @@ package x.contextualtriggers.Services;
 
 import android.Manifest;
 import android.content.Intent;
+import android.location.Location;
+import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,23 +25,77 @@ import x.contextualtriggers.MessageObjects.IWeatherInfo;
 import x.contextualtriggers.MessageObjects.WeatherInfo;
 import x.contextualtriggers.MessageObjects.WeatherType;
 
-public class WeatherService extends BackgroundService {
+public class WeatherService extends BackgroundService implements GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
     public static final String WEATHER_INTENT = "DATA_WEATHER",
                                 WEATHER_DATA = "WEATHER_INFO";
 
-    private static final String OPEN_WEATHER_MAP_API_KEY = "326a256e75a2b049deb89119dfb778bf";
+    private static final String OPEN_WEATHER_API_URL = "http://api.openweathermap.org/data/2.5/weather?",
+            LOCATION_QUERY = "q=", DEFAULT_LOCATION = "glasgow,uk",
+            COORD_QUERY = "lat=%f&lon=%f",
+            API_KEY = "&APPID=326a256e75a2b049deb89119dfb778bf";
 
-    private static final String WEATHER_API_URL =
-            "http://api.openweathermap.org/data/2.5/weather?q=glasgow,uk&APPID=" + OPEN_WEATHER_MAP_API_KEY ;
+
+    private GoogleApiClient client;
+    private Location lastKnownLocation;
 
     public WeatherService() {
         super(WeatherService.class.getSimpleName());
     }
 
     @Override
+    public void onCreate() {
+        super.onCreate();
+        this.client = new GoogleApiClient.Builder(this)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
+        this.lastKnownLocation = null;
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        this.client.connect();
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        this.client.disconnect();
+    }
+
+    @Override
     protected void onHandleIntent(Intent intent) {
         Log.d(WeatherService.class.getSimpleName(), "Fetching the weather.");
+        updateLastKnownLocation();
         broadcastWeather(processWeather(fetchWeather()));
+    }
+
+    private void updateLastKnownLocation(){
+        // Check permissions
+        if(ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                == android.content.pm.PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
+                        == android.content.pm.PackageManager.PERMISSION_GRANTED){
+            Location newLoc = LocationServices.FusedLocationApi.getLastLocation(this.client);
+            if(newLoc != null){
+                this.lastKnownLocation = newLoc;
+            }
+        }
+    }
+
+    private URL buildURL() throws IOException {
+        final StringBuilder builder = new StringBuilder(OPEN_WEATHER_API_URL);
+        if(this.lastKnownLocation != null){
+            builder.append(String.format(COORD_QUERY, this.lastKnownLocation.getLatitude(),
+                                                        this.lastKnownLocation.getLongitude()));
+        }
+        else{
+            builder.append(LOCATION_QUERY).append(DEFAULT_LOCATION);
+        }
+        return new URL(builder.append(API_KEY).toString());
     }
 
     private String fetchWeather() {
@@ -47,7 +107,7 @@ public class WeatherService extends BackgroundService {
             HttpURLConnection connection = null;
             BufferedReader reader = null;
             try {
-                final URL url = new URL(WeatherService.WEATHER_API_URL);
+                final URL url = buildURL();
 
                 connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
@@ -169,5 +229,20 @@ public class WeatherService extends BackgroundService {
         final Intent intent = new Intent(WEATHER_INTENT);
         intent.putExtra(WEATHER_DATA, info);
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        updateLastKnownLocation();
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+    }
+
+    // Best Effort; resort to the default city if we can't get the location
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        this.lastKnownLocation = null;
     }
 }

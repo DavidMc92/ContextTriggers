@@ -80,7 +80,7 @@ public class ElevatorDetectorTrigger extends BroadcastReceiver implements ITrigg
                     if(!hasNotified) {
 //                        sendNotification(context, "Left Detected", "In future why not take the stairs to use more energy.");
                         NotificationSender.sendNotification(context, NOTIFICATION_ID,
-                                R.drawable.Elevator_52,
+                                R.drawable.elevator,
                                 RouteRecommenderTrigger.class.getSimpleName(),
                                 "You are using a lift, next time why not take the stairs");
                         hasNotified = true;

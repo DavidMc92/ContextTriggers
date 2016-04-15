@@ -1,18 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res-auto">
         <PreferenceCategory android:title="Location Information">
-            <CheckBoxPreference
-                android:title="Home Location"
-                android:defaultValue="false"
-                android:key="Home Location"
-                android:summary="Set the postcode of your home address."
-                />
 
-            <CheckBoxPreference
+            <x.contextualtriggers.Application.LocationEditTextPreference
+                android:title="Home Location"
+                android:key="Home Location"
+                android:defaultValue=""
+                android:inputType="text"
+                android:singleLine="true"
+                custom:minLength="3"/>
+
+            <x.contextualtriggers.Application.LocationEditTextPreference
                 android:title="Work Location"
-                android:defaultValue="false"
                 android:key="Work Location"
-                android:summary="Set the postcode of your work address."
-                />
+                android:defaultValue=""
+                android:inputType="text"
+                android:singleLine="true"
+                custom:minLength="3"/>
         </PreferenceCategory>
 </PreferenceScreen>

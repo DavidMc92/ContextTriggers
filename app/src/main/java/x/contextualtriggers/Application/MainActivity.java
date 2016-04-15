@@ -11,6 +11,10 @@ import android.view.MenuItem;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlacePicker;
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -135,8 +139,7 @@ public class MainActivity extends AppCompatActivity {
         boolean ret;
         switch(id){
             case R.id.action_settings:
-                Intent intent = new Intent().setClassName(this, ACTIVITY_PREFERENCES);
-                startActivity(intent);
+                startActivity(new Intent().setClassName(this, ACTIVITY_PREFERENCES));
                 ret = true;
                 break;
 
@@ -149,10 +152,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public static class UserPreferenceActivity extends PreferenceActivity {
+        public static int PLACE_PICKER_REQUEST = 1000;
+
         @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             getFragmentManager().beginTransaction().replace(android.R.id.content, new UserPreferenceFragment()).commit();
+        }
+
+        @Override
+        protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+            if(requestCode == PLACE_PICKER_REQUEST){
+                if(resultCode == RESULT_OK){
+                    Place place = PlacePicker.getPlace(this, data);
+                    if(place != null){
+                        final String address = place.getAddress().toString();
+                        final LatLng ltlg = place.getLatLng();
+                    }
+                }
+
+            }
+            super.onActivityResult(requestCode, resultCode, data);
         }
 
         public static class UserPreferenceFragment extends PreferenceFragment {

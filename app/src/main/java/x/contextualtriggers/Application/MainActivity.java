@@ -1,11 +1,14 @@
 package x.contextualtriggers.Application;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.CompoundButton;
@@ -37,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
     private TriggerManager triggerManager;
     private Map<Integer, ITrigger> triggerMap; // TODO Change to Set; need to lookup proper equals()
 
+    private PreferenceContainer prefs;
+
     private List<ITrigger> triggers;
 
     @Override
@@ -48,6 +53,9 @@ public class MainActivity extends AppCompatActivity {
 
         this.triggerManager = new TriggerManager(this);
         this.triggerMap = new HashMap<>();
+
+        this.prefs = PreferenceContainer.getInstance(this);
+        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(prefs);
 
         this.elevSwitch = (Switch) findViewById(R.id.switchElev);
         this.elevSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -131,6 +139,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .unregisterOnSharedPreferenceChangeListener(prefs);
     }
 
     @Override
@@ -152,7 +162,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public static class UserPreferenceActivity extends PreferenceActivity {
-        public static int PLACE_PICKER_REQUEST = 1000;
+        // Coupled to Intents declared in XML
+        public static int PLACE_PICKER_REQUEST_HOME = 1000,
+                            PLACE_PICKER_REQUEST_WORK = 1001;
 
         @Override
         protected void onCreate(Bundle savedInstanceState) {
@@ -162,12 +174,37 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-            if(requestCode == PLACE_PICKER_REQUEST){
+            if(requestCode == PLACE_PICKER_REQUEST_HOME || requestCode == PLACE_PICKER_REQUEST_WORK){
                 if(resultCode == RESULT_OK){
                     Place place = PlacePicker.getPlace(this, data);
                     if(place != null){
-                        final String address = place.getAddress().toString();
+                        String address = place.getAddress().toString();
                         final LatLng ltlg = place.getLatLng();
+
+                        if (TextUtils.isEmpty(address)) {
+                            address = String.format("(%.2f, %.2f)",ltlg.latitude, ltlg.longitude);
+                        }
+
+                        SharedPreferences sharedPreferences =
+                                PreferenceManager.getDefaultSharedPreferences(this);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+                        int addrKey, latKey, longKey;
+                        if(requestCode == PLACE_PICKER_REQUEST_HOME){
+                            addrKey = R.string.preference_home_key;
+                            latKey = R.string.preference_home_lat;
+                            longKey = R.string.preference_home_long;
+                        }
+                        else{
+                            addrKey = R.string.preference_work_key;
+                            latKey = R.string.preference_work_lat;
+                            longKey = R.string.preference_work_long;
+                        }
+
+                        editor.putString(getString(addrKey), address);
+                        editor.putFloat(getString(latKey), (float)ltlg.latitude);
+                        editor.putFloat(getString(longKey), (float)ltlg.longitude);
+                        editor.commit();
                     }
                 }
 

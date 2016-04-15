@@ -3,20 +3,35 @@
     xmlns:custom="http://schemas.android.com/apk/res-auto">
         <PreferenceCategory android:title="Location Information">
 
-            <x.contextualtriggers.Application.LocationEditTextPreference
-                android:title="Home Location"
-                android:key="Home Location"
+            <x.contextualtriggers.Application.LocationEditTextPreference_Home
+                android:title="@string/preference_home_title"
+                android:key="@string/preference_home_key"
+                android:summary="@string/preference_home_desc"
                 android:defaultValue=""
                 android:inputType="text"
                 android:singleLine="true"
-                custom:minLength="3"/>
+                custom:minLength="3">
+                <!--
+                <intent android:action="android.intent.action.ATTACH_DATA"
+                    android:data="1000" />
+                    -->
 
-            <x.contextualtriggers.Application.LocationEditTextPreference
-                android:title="Work Location"
-                android:key="Work Location"
+            </x.contextualtriggers.Application.LocationEditTextPreference_Home>
+
+            <x.contextualtriggers.Application.LocationEditTextPreference_Work
+                android:title="@string/preference_work_title"
+                android:key="@string/preference_work_key"
+                android:summary="@string/preference_work_desc"
                 android:defaultValue=""
                 android:inputType="text"
                 android:singleLine="true"
-                custom:minLength="3"/>
+                custom:minLength="3">
+
+                <!--
+                <intent android:action="android.intent.action.ATTACH_DATA"
+                    android:data="1001" />
+                    -->
+
+            </x.contextualtriggers.Application.LocationEditTextPreference_Work>
         </PreferenceCategory>
 </PreferenceScreen>

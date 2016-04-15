@@ -10,6 +10,8 @@ import android.util.Pair;
 import java.util.ArrayList;
 import java.util.List;
 
+import x.contextualtriggers.Application.NotificationSender;
+import x.contextualtriggers.R;
 import x.contextualtriggers.Services.AccelerometerService;
 import x.contextualtriggers.Services.BarometerService;
 
@@ -18,6 +20,17 @@ import x.contextualtriggers.Services.BarometerService;
  */
 public class ElevatorDetectorTrigger extends BroadcastReceiver implements ITrigger {
     private final Context context;
+    private ArrayList<Float> barValues = new ArrayList<>();
+    private ArrayList<Float> barometerValuesDifference = new ArrayList<>();
+    private float currentAltitude = 0;
+    private float prevAltitude = 0;
+    private float altitude = 0;
+    private int arrayPos;
+    private int MAX_ARRAY_SIZE = 20;
+    private Boolean isAccValSmall, hasNotified = false;
+    private static float defaultAltitude = 1016f; // Default air pressure at sea level.
+    private float x,y,z,barValue = 0;
+    private static final int NOTIFICATION_ID = 64000;
 
     public ElevatorDetectorTrigger(Context context){
         this.context = context;
@@ -25,14 +38,63 @@ public class ElevatorDetectorTrigger extends BroadcastReceiver implements ITrigg
 
     @Override
     public void onReceive(Context context, Intent intent) {
+
         if(intent.getAction().equals(AccelerometerService.ACCELEROMETER_INTENT)){
-            float x = intent.getFloatExtra(AccelerometerService.ACCELEROMETER_X_KEY, -1.0f),
-                    y = intent.getFloatExtra(AccelerometerService.ACCELEROMETER_Y_KEY, -1.0f),
-                    z = intent.getFloatExtra(AccelerometerService.ACCELEROMETER_Z_KEY, -1.0f);
+            x = intent.getFloatExtra(AccelerometerService.ACCELEROMETER_X_KEY, -1.0f);
+            y = intent.getFloatExtra(AccelerometerService.ACCELEROMETER_Y_KEY, -1.0f);
+            z = intent.getFloatExtra(AccelerometerService.ACCELEROMETER_Z_KEY, -1.0f);
         }
-        else{
-            float barValue = intent.getFloatExtra(BarometerService.BAROM_KEY, -1.0f);
+        if(intent.getAction().equals(BarometerService.BAROMETER_INTENT)) {
+            barValue = intent.getFloatExtra(BarometerService.BAROM_KEY, -1.0f);
         }
+
+        barValues.add(barValue);
+
+        currentAltitude = (defaultAltitude - currentAltitude) * 8;
+
+        if(isAccValSmall)
+        {
+            altitude = prevAltitude - currentAltitude;
+            if (altitude < 1 && altitude > -1) {
+                //Log.v("altitude", "" + altitude);
+                barometerValuesDifference.set(arrayPos, altitude);
+                arrayPos++;
+            }
+
+            if (arrayPos >= MAX_ARRAY_SIZE) {
+                //Log.v("HERE","RESET array pos");
+                arrayPos = 0;
+            }
+
+            if (barometerValuesDifference.size() >= MAX_ARRAY_SIZE) {
+
+                int sumBarValues = 0;
+                for (int i = 0; i < barometerValuesDifference.size(); i++) {
+                    //Log.v("averageBarometerDifference", "" + averageBarometerDifference);
+                    sumBarValues += barometerValuesDifference.get(i);
+                }
+
+                int averageBarValues = sumBarValues / barometerValuesDifference.size();
+                if (averageBarValues >= 0.02 || averageBarValues <= -0.02) {
+                    //Lift Detected so send notification
+                    if(!hasNotified) {
+//                        sendNotification(context, "Left Detected", "In future why not take the stairs to use more energy.");
+                        NotificationSender.sendNotification(context, NOTIFICATION_ID,
+                                R.drawable.Elevator_52,
+                                RouteRecommenderTrigger.class.getSimpleName(),
+                                "You are using a lift, next time why not take the stairs");
+                        hasNotified = true;
+                    }
+                    else
+                    {
+                        hasNotified = false;
+                    }
+                }
+
+            }
+
+        }
+
     }
 
     @Override

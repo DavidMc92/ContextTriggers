@@ -15,4 +15,8 @@
     <string name="preference_work_key">Work Location</string>
     <string name="preference_work_lat">Work Latitude</string>
     <string name="preference_work_long">Work Longitude</string>
+
+    <string name="preference_step_target">Step Target</string>
+    <string name="preference_step_desc">Enter your pedometer step target</string>
+    <string name="preference_step_key">Step Target</string>
 </resources>

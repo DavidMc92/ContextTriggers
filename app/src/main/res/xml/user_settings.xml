@@ -34,4 +34,19 @@
 
             </x.contextualtriggers.Application.LocationEditTextPreference_Work>
         </PreferenceCategory>
+
+
+    <!-- Preference input for pedometer step target-->
+    <PreferenceCategory android:title="Pedometer Information">
+
+        <x.contextualtriggers.Application.StepTargetPreference
+            android:title="@string/preference_step_target"
+            android:key="@string/preference_step_key"
+            android:summary="@string/preference_step_desc"
+            android:inputType="text"
+            android:singleLine="true"
+            >
+        </x.contextualtriggers.Application.StepTargetPreference>
+
+    </PreferenceCategory>
 </PreferenceScreen>

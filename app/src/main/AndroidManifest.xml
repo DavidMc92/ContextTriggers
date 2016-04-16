@@ -36,6 +36,11 @@
             android:label="Preferences"></activity>
 
         <receiver android:name=".Services.SensorService$ServiceRestartBroadcastReceiver"/>
+        <receiver android:name=".Triggers.LunchTimeLocatorTrigger$MapOpenCallbackReceiver">
+            <intent-filter>
+                <action android:name="SHOW_ON_MAP_ACTION"/>
+            </intent-filter>
+        </receiver>
 
         <service android:enabled="true" android:name=".Services.AccelerometerService" />
         <service android:enabled="true" android:name=".Services.BarometerService" />

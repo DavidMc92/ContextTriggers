@@ -6,14 +6,19 @@ package x.contextualtriggers.Application;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 
 import x.contextualtriggers.R;
 
 public class NotificationSender {
     public static void sendNotification(Context context, int id, int iconId, String title, String message){
+
         final NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(context)
                         .setStyle(new NotificationCompat.BigTextStyle()
@@ -27,6 +32,28 @@ public class NotificationSender {
 
         NotificationManager mNotificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+
+        // mId allows you to update the notification later on.
+        mNotificationManager.notify(id, mBuilder.build());
+    }
+
+    public static void sendNotificationWithIntent(Context context, int id, int iconId, String title, String message,PendingIntent callback){
+
+        final NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(context)
+                        .setSmallIcon(iconId)
+                        .setColor(ContextCompat.getColor(context, R.color.colorPrimary))
+                        .setDefaults(Notification.DEFAULT_VIBRATE)
+                        .setContentTitle(title)
+                        .setStyle(new NotificationCompat.BigTextStyle()
+                                .bigText(message))
+                        .setContentText(message)
+                        .addAction(0,"Show",callback);
+
+        NotificationManager mNotificationManager =
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
 
         // mId allows you to update the notification later on.
         mNotificationManager.notify(id, mBuilder.build());

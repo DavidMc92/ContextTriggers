@@ -1,16 +1,19 @@
 package x.contextualtriggers.Triggers;
 
 import android.Manifest;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.util.Pair;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -24,6 +27,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Random;
 
 import x.contextualtriggers.Application.NotificationSender;
 import x.contextualtriggers.Application.PreferenceContainer;
@@ -40,7 +44,7 @@ import x.contextualtriggers.Services.ServiceHelper;
 import x.contextualtriggers.Services.WeatherService;
 
 // TODO
-public class LunchTimeLocatorTrigger extends BroadcastReceiver implements ITrigger {
+public class LunchTimeLocatorTrigger extends GeofenceTrigger implements ITrigger {
 
     private static final int NOTIFICATION_ID = 64001;
 
@@ -52,7 +56,8 @@ public class LunchTimeLocatorTrigger extends BroadcastReceiver implements ITrigg
     private ILocationInfo lastLocationInfo;
     private boolean hasUserLeftWork = false;
 
-    public LunchTimeLocatorTrigger(Context context) {
+    public LunchTimeLocatorTrigger(Context context){
+        super(context);
         this.context = context;
     }
 
@@ -87,10 +92,7 @@ public class LunchTimeLocatorTrigger extends BroadcastReceiver implements ITrigg
             Calendar calendar = new GregorianCalendar();
             boolean isEndOfLunchTime = (13 < calendar.get(Calendar.HOUR_OF_DAY) && calendar.get(Calendar.HOUR_OF_DAY) < 14);
             if (isSuitableWeather && isUserAvailable && isUserAtWork && !hasUserLeftWork && isEndOfLunchTime) {
-                NotificationSender.sendNotification(context, NOTIFICATION_ID,
-                        R.drawable.ic_restaurant_white_18dp,
-                        RouteRecommenderTrigger.class.getSimpleName(),
-                        "Maybe you should take a walk its lunch time");
+                new NearbyRestaurantFinder().execute("");
             }
         }
     }
@@ -100,26 +102,40 @@ public class LunchTimeLocatorTrigger extends BroadcastReceiver implements ITrigg
         final List<Pair<Class<?>, Integer>> ret = new ArrayList<>();
         ret.add(new Pair(WeatherService.class, 6000));
         ret.add(new Pair(CalendarService.class, 6000));
-        ret.add(new Pair(GeoFenceService.class, -1));
         return ret;
     }
 
     @Override
     public void registerReceivers(Context context) {
+        super.registerReceivers(context);
         LocalBroadcastManager.getInstance(context).registerReceiver(this,
                 new IntentFilter(WeatherService.WEATHER_INTENT));
         LocalBroadcastManager.getInstance(context).registerReceiver(this,
                 new IntentFilter(CalendarService.CALENDAR_INTENT));
-        LocalBroadcastManager.getInstance(context).registerReceiver(this,
-                new IntentFilter(GeoFenceService.LOCATION_INTENT));
     }
 
     @Override
     public void unregisterReceivers(Context context) {
+        super.unregisterReceivers(context);
         LocalBroadcastManager.getInstance(context).unregisterReceiver(this);
     }
 
+    public static  class MapOpenCallbackReceiver extends BroadcastReceiver {
 
+        public static void setLocationForCallBack(double lat, double lon){
+            MapOpenCallbackReceiver.lat = lat;
+            MapOpenCallbackReceiver.lon = lon;
+        }
+        private static double lat = 0,lon = 0;
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Intent mapintent = new Intent(android.content.Intent.ACTION_VIEW,
+                    Uri.parse("http://maps.google.com/maps?daddr="+lat+","+lon));
+            mapintent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            context.startActivity(mapintent);
+        }
+
+    }
     private class NearbyRestaurantFinder extends AsyncTask<String, Void, String> {
         @Override
         protected String doInBackground(String... params) {
@@ -127,10 +143,14 @@ public class LunchTimeLocatorTrigger extends BroadcastReceiver implements ITrigg
             String res =fetchNearby();
             Log.d(NearbyRestaurantFinder.class.getSimpleName(),res);
             if(!res.equals("none")){
-                NotificationSender.sendNotification(context, NOTIFICATION_ID,
+                Intent showReceive = new Intent();
+                showReceive.setAction("SHOW_ON_MAP_ACTION");
+                PendingIntent pendingIntentShow = PendingIntent.getBroadcast(context, 12345, showReceive, PendingIntent.FLAG_UPDATE_CURRENT);
+
+                NotificationSender.sendNotificationWithIntent(context, NOTIFICATION_ID,
                         R.drawable.ic_restaurant_white_18dp,
                         LunchTimeLocatorTrigger.class.getSimpleName(),
-                        ("Why not try: " + res + " for Lunch its just a short walk away"));
+                        ("Why not try: " + res + " for Lunch its just a short walk away"),pendingIntentShow);
             }else {
 
                 NotificationSender.sendNotification(context, NOTIFICATION_ID,
@@ -140,6 +160,8 @@ public class LunchTimeLocatorTrigger extends BroadcastReceiver implements ITrigg
             }
             return null;
         }
+
+
 
         @Override
         protected void onPostExecute(String result) {
@@ -156,7 +178,7 @@ public class LunchTimeLocatorTrigger extends BroadcastReceiver implements ITrigg
 
         private static final String GOOGLE_PLACES_API_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?",
                 COORD_QUERY = "location=%f,%f&radius=1000",
-                TYPE_QUERY = "&type=restaurant",
+                TYPE_QUERY = "&type=restaurant&opennow",
                 KEY_QUERY = "&key=AIzaSyD06mJGSBw5K6r9Qf4Lo5DA7FZ7Fhe7jcw";
 
 
@@ -215,11 +237,15 @@ public class LunchTimeLocatorTrigger extends BroadcastReceiver implements ITrigg
             if (data != null) {
                 try {
                     // parse the json result returned from the service
-                    final JSONObject jsonResult = new JSONObject(data);
+                    final JSONArray jsonResult = new JSONObject(data).getJSONArray("results");
 
                     // parse out the temperature from the JSON result
-                    if (jsonResult.getJSONArray("results").length() > 0) {
-                        return jsonResult.getJSONArray("results").getJSONObject(0).getString("name") + " at " + jsonResult.getJSONArray("results").getJSONObject(0).getString("vicinity");
+                    if (jsonResult.length() > 0) {
+
+                        JSONObject target =jsonResult.getJSONObject(new Random().nextInt(jsonResult.length()));
+                        JSONObject loc = target.getJSONObject("geometry").getJSONObject("location");
+                        MapOpenCallbackReceiver.setLocationForCallBack(loc.getDouble("lat"),loc.getDouble("lng"));
+                        return target.getString("name") + " at " + target.getString("vicinity");
                     } else {
                         return "none";
                     }

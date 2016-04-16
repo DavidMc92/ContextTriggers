@@ -21,7 +21,8 @@ public class NotificationSender {
                         .setDefaults(Notification.DEFAULT_VIBRATE)
                         .setContentTitle(title)
                         .setStyle(new NotificationCompat.BigTextStyle()
-                                .bigText(message));
+                                .bigText(message))
+                .setContentText(message);
 
         NotificationManager mNotificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);

@@ -3,6 +3,10 @@ package x.contextualtriggers.Triggers;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+<<<<<<< HEAD
+=======
+import android.util.Log;
+>>>>>>> Correcting merge
 import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Pair;
@@ -12,13 +16,20 @@ import java.util.Date;
 import java.util.List;
 
 import x.contextualtriggers.Application.NotificationSender;
+<<<<<<< HEAD
+=======
+import x.contextualtriggers.R;
+>>>>>>> Correcting merge
 import x.contextualtriggers.MessageObjects.CalendarInfo;
 import x.contextualtriggers.MessageObjects.ICalendarInfo;
 import x.contextualtriggers.MessageObjects.IWeatherInfo;
 import x.contextualtriggers.MessageObjects.WeatherType;
-import x.contextualtriggers.R;
 import x.contextualtriggers.Services.CalendarService;
 import x.contextualtriggers.Services.WeatherService;
+<<<<<<< HEAD
+=======
+
+>>>>>>> Correcting merge
 
 // TODO
 public class PedometerPrompterTrigger extends BroadcastReceiver implements ITrigger {
@@ -35,6 +46,16 @@ public class PedometerPrompterTrigger extends BroadcastReceiver implements ITrig
 
     @Override
     public void onReceive(Context context, Intent intent) {
+<<<<<<< HEAD
+=======
+
+        Log.d(getClass().getSimpleName(), "Received geofence trigger!");
+        NotificationSender.sendNotification(context, 64002,
+                R.drawable.ic_directions_walk_white_18dp,
+                RouteRecommenderTrigger.class.getSimpleName(),
+                "You passed a geofence!");
+
+>>>>>>> Correcting merge
         // Parse out intents
         if(intent.getAction().equals(WeatherService.WEATHER_INTENT)){
             this.currWeather = intent.getParcelableExtra(WeatherService.WEATHER_DATA);
@@ -60,11 +81,19 @@ public class PedometerPrompterTrigger extends BroadcastReceiver implements ITrig
                         "Let's get that step count up!");
             }
         }
+<<<<<<< HEAD
+=======
+
+>>>>>>> Correcting merge
     }
 
     @Override
     public List<Pair<Class<?>, Integer>> getDependentServices() {
         final List<Pair<Class<?>, Integer>> ret = new ArrayList<>();
+<<<<<<< HEAD
+=======
+
+>>>>>>> Correcting merge
         ret.add(new Pair(WeatherService.class, 500));
         ret.add(new Pair(CalendarService.class, 1000));
         //TODO Pedometer service dependence
@@ -82,6 +111,12 @@ public class PedometerPrompterTrigger extends BroadcastReceiver implements ITrig
 
     @Override
     public void unregisterReceivers(Context context) {
+<<<<<<< HEAD
         LocalBroadcastManager.getInstance(context).unregisterReceiver(this);
+=======
+
+        LocalBroadcastManager.getInstance(context).unregisterReceiver(this);
+
+>>>>>>> Correcting merge
     }
 }

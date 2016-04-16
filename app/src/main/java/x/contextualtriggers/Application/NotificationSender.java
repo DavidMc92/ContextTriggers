@@ -16,13 +16,14 @@ public class NotificationSender {
     public static void sendNotification(Context context, int id, int iconId, String title, String message){
         final NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(context)
+                        .setStyle(new NotificationCompat.BigTextStyle()
+                                .bigText(message)
+                                .setBigContentTitle(title)
+                                .setSummaryText(""))
                         .setSmallIcon(iconId)
                         .setColor(ContextCompat.getColor(context, R.color.colorPrimary))
                         .setDefaults(Notification.DEFAULT_VIBRATE)
-                        .setContentTitle(title)
-                        .setStyle(new NotificationCompat.BigTextStyle()
-                                .bigText(message))
-                .setContentText(message);
+                        .setContentTitle(title);
 
         NotificationManager mNotificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);

@@ -15,6 +15,7 @@ import x.contextualtriggers.MessageObjects.CalendarInfo;
 import x.contextualtriggers.MessageObjects.ICalendarInfo;
 import x.contextualtriggers.MessageObjects.ILocationInfo;
 import x.contextualtriggers.MessageObjects.IWeatherInfo;
+import x.contextualtriggers.MessageObjects.LocationInfo;
 import x.contextualtriggers.MessageObjects.WeatherType;
 import x.contextualtriggers.R;
 import x.contextualtriggers.Services.CalendarService;
@@ -51,18 +52,19 @@ public class RouteRecommenderTrigger extends GeofenceTrigger implements ITrigger
         }
 
         // Check if all needed info has been delivered
-        if(this.lastWeatherInfo != null && this.lastCalendarInfo != null){
+        if(this.lastWeatherInfo != null && this.lastCalendarInfo != null  &&
+                this.lastGeofenceInfo != null){
             boolean isSuitableWeather = this.lastWeatherInfo.getWeather() == WeatherType.CLOUDS ||
                                         this.lastWeatherInfo.getWeather() == WeatherType.CLEAR;
             boolean isUserAvailable = CalendarInfo.isUserFree(this.lastCalendarInfo.getCalendarEvents(),
                     new Date().getTime());
 
-            NotificationSender.sendNotification(context, NOTIFICATION_ID,
-                    R.drawable.ic_directions_walk_white_18dp,
-                    RouteRecommenderTrigger.class.getSimpleName(),
-                    "Do something, it's a nice day!");
+            boolean isUserAtWork = LocationInfo.isUserInside(this.lastGeofenceInfo.getLocationInfo(),
+                                        GEOFENCE_WORK),
+                    isUserAtHome = LocationInfo.isUserInside(this.lastGeofenceInfo.getLocationInfo(),
+                                        GEOFENCE_HOME);
 
-            if(isSuitableWeather && isUserAvailable){
+            if(isSuitableWeather && isUserAvailable && !isUserAtWork && !isUserAtHome){
                 NotificationSender.sendNotification(context, NOTIFICATION_ID,
                         R.drawable.ic_directions_walk_white_18dp,
                         RouteRecommenderTrigger.class.getSimpleName(),

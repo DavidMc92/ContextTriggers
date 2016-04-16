@@ -23,25 +23,18 @@ public class GeoFenceService extends BackgroundService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        Log.d(GeoFenceService.class.getSimpleName(), "Fency.");
+        Log.d(GeoFenceService.class.getSimpleName(), "Handling geofence information.");
         GeofencingEvent event = GeofencingEvent.fromIntent(intent);
         if (event != null) {
-            if (event.hasError()) {
-
-            } else {
+            if (!event.hasError()) {
                 int transition = event.getGeofenceTransition();
-                if (transition == Geofence.GEOFENCE_TRANSITION_ENTER || transition == Geofence.GEOFENCE_TRANSITION_DWELL || transition == Geofence.GEOFENCE_TRANSITION_EXIT) {
+                if (transition == Geofence.GEOFENCE_TRANSITION_ENTER || transition == Geofence.GEOFENCE_TRANSITION_DWELL ||
+                        transition == Geofence.GEOFENCE_TRANSITION_EXIT) {
+                    final LocationInfo.Builder builder = new LocationInfo.Builder();
                     for (Geofence geofence : event.getTriggeringGeofences()) {
-                        final LocationInfo.LocationInfoBuilder builder = new LocationInfo.LocationInfoBuilder();
-                        builder.setLocationDescription(geofence.getRequestId());
-                        if (transition == Geofence.GEOFENCE_TRANSITION_ENTER || transition == Geofence.GEOFENCE_TRANSITION_DWELL) {
-                            builder.setInside(true);
-                        } else {
-                            builder.setInside(false);
-
-                        }
-                        broadcastLocationInfo(builder.build());
+                        builder.addEntry(geofence.getRequestId(), transition);
                     }
+                    broadcastLocationInfo(builder.build());
                 }
             }
         }

@@ -32,6 +32,9 @@ import x.contextualtriggers.Services.GeoFenceService;
  */
 public abstract class GeofenceTrigger extends BroadcastReceiver implements ITrigger, GoogleApiClient.ConnectionCallbacks,
                 GoogleApiClient.OnConnectionFailedListener, ResultCallback {
+
+    protected static final String GEOFENCE_HOME = "Home", GEOFENCE_WORK = "Work";
+
     private static final int GEOFENCE_RADIUS = 50;
 
     private final Context context;
@@ -66,7 +69,7 @@ public abstract class GeofenceTrigger extends BroadcastReceiver implements ITrig
             Log.d(GeofenceTrigger.class.getSimpleName(), "Adding Home.");
 
             this.geofenceList.add(new Geofence.Builder()
-                    .setRequestId("Home")
+                    .setRequestId(GEOFENCE_HOME)
                     .setCircularRegion(PreferenceContainer.getInstance(context).getHomeLat(),
                             PreferenceContainer.getInstance(context).getHomeLong(),
                             GEOFENCE_RADIUS)
@@ -78,7 +81,7 @@ public abstract class GeofenceTrigger extends BroadcastReceiver implements ITrig
         if(!PreferenceContainer.getInstance(context).getWorkAddress().equals("")){
             Log.d(GeofenceTrigger.class.getSimpleName(), "Adding Work.");
             this.geofenceList.add(new Geofence.Builder()
-                    .setRequestId("Work")
+                    .setRequestId(GEOFENCE_WORK)
                     .setCircularRegion(PreferenceContainer.getInstance(context).getWorkLat(),
                             PreferenceContainer.getInstance(context).getWorkLong(),
                             GEOFENCE_RADIUS)
@@ -92,6 +95,9 @@ public abstract class GeofenceTrigger extends BroadcastReceiver implements ITrig
     @Override
     public void unregisterReceivers(Context context) {
         LocalBroadcastManager.getInstance(context).unregisterReceiver(this);
+        LocationServices.GeofencingApi.removeGeofences(
+                this.client, getGeofencePendingIntent()
+        ).setResultCallback(this); // Result processed in onResult().
     }
 
     @Override

@@ -31,6 +31,7 @@ import x.contextualtriggers.MessageObjects.CalendarInfo;
 import x.contextualtriggers.MessageObjects.ICalendarInfo;
 import x.contextualtriggers.MessageObjects.ILocationInfo;
 import x.contextualtriggers.MessageObjects.IWeatherInfo;
+import x.contextualtriggers.MessageObjects.LocationInfo;
 import x.contextualtriggers.MessageObjects.WeatherType;
 import x.contextualtriggers.R;
 import x.contextualtriggers.Services.CalendarService;
@@ -66,12 +67,11 @@ public class LunchTimeLocatorTrigger extends BroadcastReceiver implements ITrigg
         } else if (intent.getAction().equals(GeoFenceService.LOCATION_INTENT)) {
             this.lastLocationInfo = intent.getParcelableExtra(GeoFenceService.LOCATION_DATA);
             Log.d(LunchTimeLocatorTrigger.class.getSimpleName(), "GeoFenceIntent");
-            if (this.lastLocationInfo.getLocationName().equals("Work") && !this.lastLocationInfo.getInside()) {
+            if(!LocationInfo.isUserInside(this.lastLocationInfo.getLocationInfo(), "Work")){
                 Calendar calendar = new GregorianCalendar();
                 if (11 < calendar.get(Calendar.HOUR_OF_DAY) && calendar.get(Calendar.HOUR_OF_DAY) < 14) {
                     hasUserLeftWork = true;
                 }
-
             }
         }
 
@@ -83,7 +83,7 @@ public class LunchTimeLocatorTrigger extends BroadcastReceiver implements ITrigg
                     this.lastWeatherInfo.getWeather() == WeatherType.CLEAR;
             boolean isUserAvailable = CalendarInfo.isUserFree(this.lastCalendarInfo.getCalendarEvents(),
                     new Date().getTime());
-            boolean isUserAtWork = (lastLocationInfo.getLocationName().equals("Work") && lastLocationInfo.getInside());
+            boolean isUserAtWork = (LocationInfo.isUserInside(this.lastLocationInfo.getLocationInfo(), "Work"));
             Calendar calendar = new GregorianCalendar();
             boolean isEndOfLunchTime = (13 < calendar.get(Calendar.HOUR_OF_DAY) && calendar.get(Calendar.HOUR_OF_DAY) < 14);
             if (isSuitableWeather && isUserAvailable && isUserAtWork && !hasUserLeftWork && isEndOfLunchTime) {

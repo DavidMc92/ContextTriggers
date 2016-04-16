@@ -2,23 +2,34 @@ package x.contextualtriggers.MessageObjects;
 
 import android.os.Parcel;
 
-/**
- * Created by Sean on 14/04/2016.
- */
+import com.google.android.gms.location.Geofence;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public class LocationInfo implements ILocationInfo {
-    private final boolean inside;
-    private final String locationDesc;
+    private final Map<String, Integer> locationInfo;
 
-    public LocationInfo(final String locationDesc, final boolean inside){
-        this.inside = inside;
-        this.locationDesc = locationDesc;
-
+    public LocationInfo(final Map<String, Integer> locationInfo){
+        this.locationInfo = locationInfo;
     }
-    @Override
-    public String getLocationName(){return this.locationDesc;}
 
     @Override
-    public  boolean getInside(){return this.inside;}
+    public Map<String, Integer> getLocationInfo() {
+        return this.locationInfo;
+    }
+
+    public static boolean isUserInside(Map<String, Integer> locInfo, String desc){
+        boolean ret = false;
+        if(locInfo.containsKey(desc)){
+            final int transition = locInfo.get(desc);
+            if(transition == Geofence.GEOFENCE_TRANSITION_ENTER ||
+                    transition == Geofence.GEOFENCE_TRANSITION_DWELL){
+                ret = true;
+            }
+        }
+        return ret;
+    }
 
     @Override
     public int describeContents() {
@@ -26,16 +37,14 @@ public class LocationInfo implements ILocationInfo {
     }
 
     public LocationInfo(Parcel in){
-        this.inside = true;
-        this.locationDesc = in.readString();
+        this.locationInfo = new HashMap<>();
+        in.readMap(this.locationInfo, null);
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        //dest.writeValue(this.entering);
-        //dest.writeString(this.locationDesc);
+        dest.writeMap(this.locationInfo);
     }
-
 
     public static final Creator CREATOR = new Creator() {
         public LocationInfo createFromParcel(Parcel in) {
@@ -48,25 +57,21 @@ public class LocationInfo implements ILocationInfo {
     };
 
     // Builder design pattern
-    public static final class LocationInfoBuilder {
+    public static final class Builder {
         // Assign bad defaults
-        private boolean inside = true;
-        private String desc = "";
+        private Map<String, Integer> locInfo;
 
-        public LocationInfoBuilder(){}
-
-        public LocationInfoBuilder setInside(boolean inside){
-            this.inside = inside;
-            return this;
+        public Builder(){
+            this.locInfo = new HashMap<>();
         }
 
-        public LocationInfoBuilder setLocationDescription(String locationDescription){
-            this.desc = locationDescription;
+        public Builder addEntry(String desc, Integer status){
+            this.locInfo.put(desc, status);
             return this;
         }
 
         public LocationInfo build(){
-            return new LocationInfo( this.desc,this.inside);
+            return new LocationInfo(this.locInfo);
         }
     }
 }

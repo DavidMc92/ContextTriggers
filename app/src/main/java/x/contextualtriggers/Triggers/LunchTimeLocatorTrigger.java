@@ -1,7 +1,5 @@
 package x.contextualtriggers.Triggers;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -72,8 +70,9 @@ public class LunchTimeLocatorTrigger extends BroadcastReceiver implements ITrigg
             boolean isUserAvailable = CalendarInfo.isUserFree(this.lastCalendarInfo.getCalendarEvents(),
                     new Date().getTime());
             boolean isUserAtWork = (lastLocationInfo.getLocationName().equals("Work") && lastLocationInfo.getInside());
-
-            if(isSuitableWeather && isUserAvailable && isUserAtWork && !hasUserLeftWork){
+            Calendar calendar = new GregorianCalendar();
+            boolean isEndOfLunchTime = ( 13 < calendar.get(Calendar.HOUR_OF_DAY) && calendar.get(Calendar.HOUR_OF_DAY) < 14);
+            if(isSuitableWeather && isUserAvailable && isUserAtWork && !hasUserLeftWork && isEndOfLunchTime){
                 NotificationSender.sendNotification(context, NOTIFICATION_ID,
                         R.drawable.ic_restaurant_white_18dp,
                         RouteRecommenderTrigger.class.getSimpleName(),

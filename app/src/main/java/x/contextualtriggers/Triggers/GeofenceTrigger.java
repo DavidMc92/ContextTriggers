@@ -37,8 +37,8 @@ public abstract class GeofenceTrigger extends BroadcastReceiver implements ITrig
 
     private static final int GEOFENCE_RADIUS = 50;
 
+    protected final GoogleApiClient client;
     private final Context context;
-    private final GoogleApiClient client;
     private final List<Geofence> geofenceList;
 
     public GeofenceTrigger(Context context){

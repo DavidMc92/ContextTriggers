@@ -1,14 +1,22 @@
 package x.contextualtriggers.Triggers;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.location.Location;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Pair;
+
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import x.contextualtriggers.Application.NotificationSender;
 import x.contextualtriggers.MessageObjects.CalendarInfo;
@@ -23,7 +31,7 @@ import x.contextualtriggers.Services.GeoFenceService;
 import x.contextualtriggers.Services.WeatherService;
 
 // TODO
-public class RouteRecommenderTrigger extends GeofenceTrigger implements ITrigger {
+public class RouteRecommenderTrigger extends GeofenceTrigger implements ITrigger, LocationListener {
     private static final int NOTIFICATION_ID = 64000;
 
     private final Context context;
@@ -32,6 +40,9 @@ public class RouteRecommenderTrigger extends GeofenceTrigger implements ITrigger
     private IWeatherInfo lastWeatherInfo;
     private ICalendarInfo lastCalendarInfo;
     private ILocationInfo lastGeofenceInfo;
+
+    private Location lastKnownLocation;
+    private boolean requestingLocationUpdates;
 
     public RouteRecommenderTrigger(Context context){
         super(context);
@@ -63,12 +74,18 @@ public class RouteRecommenderTrigger extends GeofenceTrigger implements ITrigger
                                         GEOFENCE_WORK),
                     isUserAtHome = LocationInfo.isUserInside(this.lastGeofenceInfo.getLocationInfo(),
                                         GEOFENCE_HOME);
-
+            // First stage conditions are suitable
             if(isSuitableWeather && isUserAvailable && !isUserAtWork && !isUserAtHome){
+                if(!this.requestingLocationUpdates){
+                    this.startLocationUpdates();
+                }
                 NotificationSender.sendNotification(context, NOTIFICATION_ID,
                         R.drawable.ic_directions_walk_white_18dp,
                         RouteRecommenderTrigger.class.getSimpleName(),
                         "Do something, it's a nice day!");
+            }
+            else{
+                this.stopLocationUpdates();
             }
         }
     }
@@ -76,8 +93,8 @@ public class RouteRecommenderTrigger extends GeofenceTrigger implements ITrigger
     @Override
     public List<Pair<Class<?>, Integer>> getDependentServices() {
         final List<Pair<Class<?>, Integer>> ret = new ArrayList<>(super.getDependentServices());
-        ret.add(new Pair(WeatherService.class, 30*1000));
-        ret.add(new Pair(CalendarService.class, 30*1000));
+        ret.add(new Pair(WeatherService.class, 30 * 1000));
+        ret.add(new Pair(CalendarService.class, 30 * 1000));
         return ret;
     }
 
@@ -96,5 +113,45 @@ public class RouteRecommenderTrigger extends GeofenceTrigger implements ITrigger
         super.unregisterReceivers(context);
 
         LocalBroadcastManager.getInstance(context).unregisterReceiver(this);
+    }
+
+    private void startLocationUpdates(){
+        if(client != null && client.isConnected() &&
+            (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+                == android.content.pm.PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION)
+                    == android.content.pm.PackageManager.PERMISSION_GRANTED)) {
+            LocationServices.FusedLocationApi.requestLocationUpdates(client,
+                    createLocationRequest(), this);
+            this.requestingLocationUpdates = true;
+        }
+    }
+
+    private void stopLocationUpdates(){
+        if(this.requestingLocationUpdates && client != null && client.isConnected() &&
+                (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+                        == android.content.pm.PackageManager.PERMISSION_GRANTED ||
+                        ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION)
+                                == android.content.pm.PackageManager.PERMISSION_GRANTED)) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(client, this);
+            this.requestingLocationUpdates = false;
+        }
+    }
+
+    private LocationRequest createLocationRequest(){
+        return new LocationRequest()
+                .setExpirationDuration(TimeUnit.HOURS.toMillis(1))
+                .setInterval(TimeUnit.SECONDS.toMillis(15))
+                .setFastestInterval(TimeUnit.SECONDS.toMillis(5))
+                .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
+                ;
+    }
+
+    // Trigger conditions are suitable for location updates; check if user set distance
+    @Override
+    public void onLocationChanged(Location location) {
+        if(location != null) {
+            this.lastKnownLocation = location;
+        }
     }
 }

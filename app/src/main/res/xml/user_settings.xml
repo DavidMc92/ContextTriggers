@@ -37,6 +37,7 @@
 
 
     <!-- Preference input for pedometer step target-->
+    <!--
     <PreferenceCategory android:title="Pedometer Information">
 
         <x.contextualtriggers.Application.StepTargetPreference
@@ -47,6 +48,6 @@
             android:singleLine="true"
             >
         </x.contextualtriggers.Application.StepTargetPreference>
-
     </PreferenceCategory>
+    -->
 </PreferenceScreen>

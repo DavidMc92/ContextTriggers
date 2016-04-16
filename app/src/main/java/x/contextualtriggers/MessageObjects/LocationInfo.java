@@ -6,11 +6,11 @@ import android.os.Parcel;
  * Created by Sean on 14/04/2016.
  */
 public class LocationInfo implements ILocationInfo {
-    private final boolean entering;
+    private final boolean inside;
     private final String locationDesc;
 
-    public LocationInfo(final String locationDesc, final boolean entering){
-        this.entering = entering;
+    public LocationInfo(final String locationDesc, final boolean inside){
+        this.inside = inside;
         this.locationDesc = locationDesc;
 
     }
@@ -18,7 +18,7 @@ public class LocationInfo implements ILocationInfo {
     public String getLocationName(){return this.locationDesc;}
 
     @Override
-    public  boolean getEnterExit(){return this.entering;}
+    public  boolean getInside(){return this.inside;}
 
     @Override
     public int describeContents() {
@@ -26,7 +26,7 @@ public class LocationInfo implements ILocationInfo {
     }
 
     public LocationInfo(Parcel in){
-        this.entering = true;
+        this.inside = true;
         this.locationDesc = in.readString();
     }
 
@@ -50,13 +50,13 @@ public class LocationInfo implements ILocationInfo {
     // Builder design pattern
     public static final class LocationInfoBuilder {
         // Assign bad defaults
-        private boolean entering = true;
+        private boolean inside = true;
         private String desc = "";
 
         public LocationInfoBuilder(){}
 
-        public LocationInfoBuilder setEntering(boolean entering){
-            this.entering = entering;
+        public LocationInfoBuilder setInside(boolean inside){
+            this.inside = inside;
             return this;
         }
 
@@ -66,7 +66,7 @@ public class LocationInfo implements ILocationInfo {
         }
 
         public LocationInfo build(){
-            return new LocationInfo( this.desc,this.entering);
+            return new LocationInfo( this.desc,this.inside);
         }
     }
 }

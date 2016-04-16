@@ -7,7 +7,7 @@ import android.os.Parcelable;
  */
 public interface ILocationInfo extends Parcelable {
     String getLocationName();    // user defined name for location
-    boolean getEnterExit();       // entering or exiting
+    boolean getInside();       // entering or exiting
 
 }
 

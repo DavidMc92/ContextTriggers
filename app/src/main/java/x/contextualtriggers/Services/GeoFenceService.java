@@ -131,9 +131,9 @@ public class GeoFenceService extends BackgroundService implements GoogleApiClien
                     builder.setLocationDescription(event.getTriggeringGeofences().get(0).getRequestId());
                     if (transition == Geofence.GEOFENCE_TRANSITION_ENTER || transition == Geofence.GEOFENCE_TRANSITION_DWELL) {
 
-                        builder.setEntering(true);
+                        builder.setInside(true);
                     }else {
-                        builder.setEntering(false);
+                        builder.setInside(false);
 
                     }
                     broadcastLocationInfo(builder.build());

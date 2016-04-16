@@ -1,6 +1,5 @@
 package x.contextualtriggers.Triggers;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -14,14 +13,16 @@ import java.util.List;
 import x.contextualtriggers.Application.NotificationSender;
 import x.contextualtriggers.MessageObjects.CalendarInfo;
 import x.contextualtriggers.MessageObjects.ICalendarInfo;
+import x.contextualtriggers.MessageObjects.ILocationInfo;
 import x.contextualtriggers.MessageObjects.IWeatherInfo;
 import x.contextualtriggers.MessageObjects.WeatherType;
 import x.contextualtriggers.R;
 import x.contextualtriggers.Services.CalendarService;
+import x.contextualtriggers.Services.GeoFenceService;
 import x.contextualtriggers.Services.WeatherService;
 
 // TODO
-public class RouteRecommenderTrigger extends BroadcastReceiver implements ITrigger {
+public class RouteRecommenderTrigger extends GeofenceTrigger implements ITrigger {
     private static final int NOTIFICATION_ID = 64000;
 
     private final Context context;
@@ -29,8 +30,10 @@ public class RouteRecommenderTrigger extends BroadcastReceiver implements ITrigg
     // Info from appropriate services allowing action
     private IWeatherInfo lastWeatherInfo;
     private ICalendarInfo lastCalendarInfo;
+    private ILocationInfo lastGeofenceInfo;
 
     public RouteRecommenderTrigger(Context context){
+        super(context);
         this.context = context;
     }
 
@@ -43,6 +46,9 @@ public class RouteRecommenderTrigger extends BroadcastReceiver implements ITrigg
         else if(intent.getAction().equals(CalendarService.CALENDAR_INTENT)){
             this.lastCalendarInfo = intent.getParcelableExtra(CalendarService.CALENDAR_DATA);
         }
+        else if(intent.getAction().equals(GeoFenceService.LOCATION_INTENT)){
+            this.lastGeofenceInfo = intent.getParcelableExtra(GeoFenceService.LOCATION_DATA);
+        }
 
         // Check if all needed info has been delivered
         if(this.lastWeatherInfo != null && this.lastCalendarInfo != null){
@@ -50,6 +56,11 @@ public class RouteRecommenderTrigger extends BroadcastReceiver implements ITrigg
                                         this.lastWeatherInfo.getWeather() == WeatherType.CLEAR;
             boolean isUserAvailable = CalendarInfo.isUserFree(this.lastCalendarInfo.getCalendarEvents(),
                     new Date().getTime());
+
+            NotificationSender.sendNotification(context, NOTIFICATION_ID,
+                    R.drawable.ic_directions_walk_white_18dp,
+                    RouteRecommenderTrigger.class.getSimpleName(),
+                    "Do something, it's a nice day!");
 
             if(isSuitableWeather && isUserAvailable){
                 NotificationSender.sendNotification(context, NOTIFICATION_ID,
@@ -62,14 +73,16 @@ public class RouteRecommenderTrigger extends BroadcastReceiver implements ITrigg
 
     @Override
     public List<Pair<Class<?>, Integer>> getDependentServices() {
-        final List<Pair<Class<?>, Integer>> ret = new ArrayList<>();
-        ret.add(new Pair(WeatherService.class, 500));
-        ret.add(new Pair(CalendarService.class, 1000));
+        final List<Pair<Class<?>, Integer>> ret = new ArrayList<>(super.getDependentServices());
+        ret.add(new Pair(WeatherService.class, 30*1000));
+        ret.add(new Pair(CalendarService.class, 30*1000));
         return ret;
     }
 
     @Override
     public void registerReceivers(Context context) {
+        super.registerReceivers(context);
+
         LocalBroadcastManager.getInstance(context).registerReceiver(this,
                 new IntentFilter(WeatherService.WEATHER_INTENT));
         LocalBroadcastManager.getInstance(context).registerReceiver(this,
@@ -78,6 +91,8 @@ public class RouteRecommenderTrigger extends BroadcastReceiver implements ITrigg
 
     @Override
     public void unregisterReceivers(Context context) {
+        super.unregisterReceivers(context);
+
         LocalBroadcastManager.getInstance(context).unregisterReceiver(this);
     }
 }

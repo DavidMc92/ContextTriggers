@@ -3,7 +3,7 @@ package x.contextualtriggers.MessageObjects;
 import android.os.Parcelable;
 
 /**
- * Created by Sean on 14/04/2016.
+ * Created by Colin on 15/04/2016.
  */
 public interface IWeatherInfo extends Parcelable {
     double getTemperature();    // Celsius

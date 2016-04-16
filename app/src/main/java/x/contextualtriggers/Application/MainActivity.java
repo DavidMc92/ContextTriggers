@@ -77,14 +77,21 @@ public class MainActivity extends AppCompatActivity {
         this.lunchSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked && !triggerMap.containsKey(1)){
-                    final ITrigger trigger = new LunchTimeLocatorTrigger(getApplicationContext());
-                    triggerManager.enableTrigger(trigger);
-                    triggerMap.put(1, trigger);
+                if(prefs.getWorkAddress().equals("")){
+                    Toast.makeText(getApplicationContext(),
+                            "Please specify your work locations using the Settings!",
+                            Toast.LENGTH_SHORT).show();
+                    lunchSwitch.setChecked(false);
                 }
-                else if(triggerMap.containsKey(1)){
-                    final ITrigger trigger = triggerMap.remove(1);
-                    triggerManager.disableTrigger(trigger);
+                else {
+                    if (isChecked && !triggerMap.containsKey(1)) {
+                        final ITrigger trigger = new LunchTimeLocatorTrigger(getApplicationContext());
+                        triggerManager.enableTrigger(trigger);
+                        triggerMap.put(1, trigger);
+                    } else if (triggerMap.containsKey(1)) {
+                        final ITrigger trigger = triggerMap.remove(1);
+                        triggerManager.disableTrigger(trigger);
+                    }
                 }
             }
         });

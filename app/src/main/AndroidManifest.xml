@@ -41,6 +41,7 @@
         <service android:enabled="true" android:name=".Services.BarometerService" />
         <service android:enabled="true" android:name=".Services.CalendarService" />
         <service android:enabled="true" android:name=".Services.WeatherService" />
+        <service android:enabled="true" android:name=".Services.GeoFenceService" />
 
     </application>
 

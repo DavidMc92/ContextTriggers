@@ -3,6 +3,7 @@ package x.contextualtriggers.Triggers;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
 import android.util.Log;
 import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
@@ -27,6 +28,7 @@ import x.contextualtriggers.Services.WeatherService;
 public class PedometerPrompterTrigger extends BroadcastReceiver implements ITrigger {
     private final Context context;
     private static final int NOTIFICATION_ID = 64002;
+    private Location currLocation;
     private int steps;
     private Boolean hasNotified = false;
     private Calendar c = Calendar.getInstance();
@@ -67,18 +69,18 @@ public class PedometerPrompterTrigger extends BroadcastReceiver implements ITrig
                     new Date().getTime());
 
             // TODO: perform check for user to have met step target
-            int target = 100;
+            int target = 10000;
             boolean hasMetTarget = steps >= target;
 
             // Check that time of day is between 12pm and 8pm
-            boolean activeTime = hours < 12 && hours > 20;
+            boolean activeTime = hours <= 18 && hours > 20;
 
             // Check weather, availability and step count
             if (isSuitableWeather && isUserAvailable && !hasMetTarget && activeTime) {
                 NotificationSender.sendNotification(context, NOTIFICATION_ID,
                         R.drawable.ic_pedometer_white,
                         PedometerPrompterTrigger.class.getSimpleName(),
-                        "You've not met your target today!Let's get that step count up!");
+                        "You've not met your target today!Current count: " + steps);
                 hasNotified = true;
             } else {
                 hasNotified = false;
@@ -90,9 +92,9 @@ public class PedometerPrompterTrigger extends BroadcastReceiver implements ITrig
     @Override
     public List<Pair<Class<?>, Integer>> getDependentServices() {
         final List<Pair<Class<?>, Integer>> ret = new ArrayList<>();
-        ret.add(new Pair(WeatherService.class, 500));
-        ret.add(new Pair(CalendarService.class, 1000));
-        ret.add(new Pair(StepCounterService.class, 500));
+        ret.add(new Pair(WeatherService.class, -1));
+        ret.add(new Pair(CalendarService.class, -1));
+        ret.add(new Pair(StepCounterService.class, -1));
         return ret;
     }
 

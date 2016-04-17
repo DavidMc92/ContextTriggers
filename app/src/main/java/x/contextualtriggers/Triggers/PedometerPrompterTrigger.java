@@ -92,8 +92,8 @@ public class PedometerPrompterTrigger extends BroadcastReceiver implements ITrig
     @Override
     public List<Pair<Class<?>, Integer>> getDependentServices() {
         final List<Pair<Class<?>, Integer>> ret = new ArrayList<>();
-        ret.add(new Pair(WeatherService.class, -1));
-        ret.add(new Pair(CalendarService.class, -1));
+        ret.add(new Pair(WeatherService.class, 8000));
+        ret.add(new Pair(CalendarService.class, 8000));
         ret.add(new Pair(StepCounterService.class, -1));
         return ret;
     }

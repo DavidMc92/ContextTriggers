@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">ContextualTriggers</string>
+    <string name="action_settings">Settings</string>
+    <string name="google_api_key">AIzaSyDg0VW8SZY4CnHl9dHYU5x3iDlGiIeCJU8</string>
+
+    <!-- Preferences stuff -->
+    <string name="preference_home_title">Home Location</string>
+    <string name="preference_home_desc">Specify your home address by text or map.</string>
+    <string name="preference_home_key">Home Location</string>
+    <string name="preference_home_lat">Home Latitude</string>
+    <string name="preference_home_long">Home Longitude</string>
+
+    <string name="preference_work_title">Work Location</string>
+    <string name="preference_work_desc">Specify your work address by text or map.</string>
+    <string name="preference_work_key">Work Location</string>
+    <string name="preference_work_lat">Work Latitude</string>
+    <string name="preference_work_long">Work Longitude</string>
+
+    <string name="preference_step_target">Step Target</string>
+    <string name="preference_step_desc">Enter your pedometer step target</string>
+    <string name="preference_step_key">Step Target</string>
+</resources>

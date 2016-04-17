@@ -128,7 +128,7 @@ public class LunchTimeLocatorTrigger extends GeofenceTrigger implements ITrigger
         @Override
         public void onReceive(Context context, Intent intent) {
             Intent mapintent = new Intent(android.content.Intent.ACTION_VIEW,
-                    Uri.parse("http://maps.google.com/maps?daddr="+lat+","+lon));
+                    Uri.parse("http://maps.google.com/maps?daddr="+lat+","+lon+"&directionsmode=walking"));
             mapintent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             context.startActivity(mapintent);
         }

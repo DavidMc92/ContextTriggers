@@ -25,6 +25,7 @@ import x.contextualtriggers.MessageObjects.ICalendarInfo;
 import x.contextualtriggers.MessageObjects.IWeatherInfo;
 import x.contextualtriggers.MessageObjects.WeatherType;
 import x.contextualtriggers.Services.CalendarService;
+import x.contextualtriggers.Services.StepCounterService;
 import x.contextualtriggers.Services.WeatherService;
 <<<<<<< HEAD
 =======
@@ -35,6 +36,7 @@ import x.contextualtriggers.Services.WeatherService;
 public class PedometerPrompterTrigger extends BroadcastReceiver implements ITrigger {
     private final Context context;
     private static final int NOTIFICATION_ID = 64002;
+    private int steps;
 
     // Required services for trigger conditions
     private IWeatherInfo currWeather;
@@ -47,6 +49,7 @@ public class PedometerPrompterTrigger extends BroadcastReceiver implements ITrig
     @Override
     public void onReceive(Context context, Intent intent) {
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
         Log.d(getClass().getSimpleName(), "Received geofence trigger!");
@@ -56,24 +59,36 @@ public class PedometerPrompterTrigger extends BroadcastReceiver implements ITrig
                 "You passed a geofence!");
 
 >>>>>>> Correcting merge
+=======
+>>>>>>> Tidying up PedometerPrompter code to include step_counter intent. Need to fix preference for step target still
         // Parse out intents
+        // WEATHER
         if(intent.getAction().equals(WeatherService.WEATHER_INTENT)){
             this.currWeather = intent.getParcelableExtra(WeatherService.WEATHER_DATA);
         }
+
+        // CALENDAR
         else if(intent.getAction().equals(CalendarService.CALENDAR_INTENT)){
             this.currCalendar = intent.getParcelableExtra(CalendarService.CALENDAR_DATA);
         }
 
+        // PEDOMETER
+        if(intent.getAction().equals(StepCounterService.PEDOMETER_INTENT)) {
+            this.steps = intent.getIntExtra(StepCounterService.PEDOMETER_KEY, 0);
+        }
+
         // Check if all needed info has been delivered
-        if(this.currWeather != null && this.currCalendar != null) {
+        if(this.currWeather != null && this.currCalendar != null && this.steps != 0) {
             boolean isSuitableWeather = this.currWeather.getWeather() == WeatherType.CLOUDS ||
                     this.currWeather.getWeather() == WeatherType.CLEAR;
+
             boolean isUserAvailable = CalendarInfo.isUserFree(this.currCalendar.getCalendarEvents(),
                     new Date().getTime());
+
             // TODO: perform check for user to have met step target
 
+            
             // Check weather, availability and step count
-
             if(isSuitableWeather && isUserAvailable) { // & !metStepTarget
                 NotificationSender.sendNotification(context, NOTIFICATION_ID,
                         R.drawable.ic_pedometer_white,

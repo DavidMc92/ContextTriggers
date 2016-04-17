@@ -79,9 +79,7 @@ public class LunchTimeLocatorTrigger extends GeofenceTrigger implements ITrigger
                 }
             }
         }
-
-        new NearbyRestaurantFinder().execute("");
-
+        
         // Check if all needed info has been delivered
         if (this.lastWeatherInfo != null && this.lastCalendarInfo != null && this.lastLocationInfo != null) {
             boolean isSuitableWeather = this.lastWeatherInfo.getWeather() == WeatherType.CLOUDS ||

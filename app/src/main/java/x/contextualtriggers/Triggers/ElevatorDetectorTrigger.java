@@ -15,9 +15,6 @@ import x.contextualtriggers.R;
 import x.contextualtriggers.Services.AccelerometerService;
 import x.contextualtriggers.Services.BarometerService;
 
-/**
- * Created by davidmcnicol on 18/03/16.
- */
 public class ElevatorDetectorTrigger extends BroadcastReceiver implements ITrigger {
     private final Context context;
     private ArrayList<Float> barValues = new ArrayList<>();
@@ -28,12 +25,16 @@ public class ElevatorDetectorTrigger extends BroadcastReceiver implements ITrigg
     private int arrayPos;
     private int MAX_ARRAY_SIZE = 20;
     private Boolean isAccValSmall, hasNotified = false;
-    private static float defaultAltitude = 1016f; // Default air pressure at sea level.
+    private static float defaultAltitude = 1013f; // Default air pressure at sea level.
     private float x,y,z,barValue = 0;
     private static final int NOTIFICATION_ID = 64000;
 
     public ElevatorDetectorTrigger(Context context){
         this.context = context;
+        for(int i = 0; i < MAX_ARRAY_SIZE; i++){
+            barometerValuesDifference.add((float) 0);
+        }
+
     }
 
     @Override

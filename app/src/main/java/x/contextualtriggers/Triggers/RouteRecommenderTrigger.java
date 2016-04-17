@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.util.Pair;
 
 import com.google.android.gms.location.ActivityRecognition;
@@ -32,8 +33,8 @@ import x.contextualtriggers.Application.NotificationSender;
 import x.contextualtriggers.Application.PreferenceContainer;
 import x.contextualtriggers.MessageObjects.ActivityInfo;
 import x.contextualtriggers.MessageObjects.CalendarInfo;
-import x.contextualtriggers.MessageObjects.CommuteDetection;
-import x.contextualtriggers.MessageObjects.CommuteStatus;
+import x.contextualtriggers.Misc.CommuteDetection;
+import x.contextualtriggers.Misc.CommuteStatus;
 import x.contextualtriggers.MessageObjects.IActivityInfo;
 import x.contextualtriggers.MessageObjects.ICalendarInfo;
 import x.contextualtriggers.MessageObjects.ILocationInfo;
@@ -93,7 +94,7 @@ public class RouteRecommenderTrigger extends GeofenceTrigger implements ITrigger
                 this.lastGeofenceInfo != null){
             boolean isSuitableWeather = this.lastWeatherInfo.getWeather() == WeatherType.CLEAR ||
                     (this.lastWeatherInfo.getWeather() == WeatherType.CLOUDS &&
-                            this.lastWeatherInfo.getRainVolume() < 10); // Clear or cloudy but dry
+                            this.lastWeatherInfo.getRainVolume() < 50); // Clear or cloudy but dry
             boolean isUserAvailable = CalendarInfo.isUserFree(this.lastCalendarInfo.getCalendarEvents(),
                     new Date().getTime());
 
@@ -102,7 +103,7 @@ public class RouteRecommenderTrigger extends GeofenceTrigger implements ITrigger
                     isUserAtHome = LocationInfo.isUserInside(this.lastGeofenceInfo.getLocationInfo(),
                             GEOFENCE_HOME);
             // First stage conditions are suitable
-            if(true || (isSuitableWeather && isUserAvailable && !isUserAtWork && !isUserAtHome &&
+            if((isSuitableWeather && isUserAvailable && !isUserAtWork && !isUserAtHome &&
                     nextPossibleNotificationTime < new Date().getTime())){
                 if(!this.requestingGoogleAPIUpdates){
                     this.startGoogleAPIUpdates();
@@ -117,8 +118,8 @@ public class RouteRecommenderTrigger extends GeofenceTrigger implements ITrigger
     @Override
     public List<Pair<Class<?>, Integer>> getDependentServices() {
         final List<Pair<Class<?>, Integer>> ret = new ArrayList<>(super.getDependentServices());
-        ret.add(new Pair(WeatherService.class, 30 * 1000));
-        ret.add(new Pair(CalendarService.class, 30 * 1000));
+        ret.add(new Pair(WeatherService.class, TimeUnit.MINUTES.toMillis(15)));
+        ret.add(new Pair(CalendarService.class, TimeUnit.MINUTES.toMillis(30)));
         return ret;
     }
 
@@ -183,8 +184,8 @@ public class RouteRecommenderTrigger extends GeofenceTrigger implements ITrigger
     private LocationRequest createLocationRequest(){
         return new LocationRequest()
                 .setExpirationDuration(TimeUnit.HOURS.toMillis(1))
-                .setInterval(TimeUnit.SECONDS.toMillis(15))
-                .setFastestInterval(TimeUnit.SECONDS.toMillis(5))
+                .setInterval(TimeUnit.SECONDS.toMillis(120))
+                .setFastestInterval(TimeUnit.SECONDS.toMillis(60))
                 .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
     }
 
@@ -207,14 +208,14 @@ public class RouteRecommenderTrigger extends GeofenceTrigger implements ITrigger
         // Use a rough estimation to detect if the user is commuting between home and work
         final CommuteDetection commuteDetection = new CommuteDetection(CommuteStatus.NOT_COMMUTING);
         isCommuting(commuteDetection);
-        if(true || commuteDetection.getCommuteStatus() != CommuteStatus.NOT_COMMUTING){
+        if(commuteDetection.getCommuteStatus() != CommuteStatus.NOT_COMMUTING){
             // Fetch the travel distance
             final boolean goingHome = commuteDetection.getCommuteStatus() == CommuteStatus.COMMUTING_TO_HOME;
             final float distanceToTravel = goingHome ?
                     commuteDetection.getCurrentDistanceToHome() :
                     commuteDetection.getCurrentDistanceToWork();
             // If the shortest route is below a threshold of 5 kilometres
-            if(true || distanceToTravel < 5){
+            if(distanceToTravel < 5){
                 // Make a request to GoogleMaps for the travel-time between the two-points based on
                 // their mode of transport
                 new GoogleMapsQueryTask(this, (float)currentLocation.getLatitude(),
@@ -261,7 +262,6 @@ public class RouteRecommenderTrigger extends GeofenceTrigger implements ITrigger
                     PreferenceContainer.getInstance(context).getWorkLat(),
                     PreferenceContainer.getInstance(context).getWorkLong()));
             // Getting closer to home
-            // TODO need threshold checking like 0.25 km
             if(ret.getCurrentDistanceToHome() < ret.getPreviousDistanceToHome() &&
                     ret.getCurrentDistanceToWork() > ret.getPreviousDistanceToWork()){
                 ret.setCommuteStatus(CommuteStatus.COMMUTING_TO_HOME);
@@ -339,7 +339,8 @@ public class RouteRecommenderTrigger extends GeofenceTrigger implements ITrigger
 
                     duration = temp5.getLong("value");
                 }
-                catch(JSONException json){}
+                catch(JSONException json){
+                    Log.d(getClass().getSimpleName(), json.toString());}
             }
             return duration;
         }
@@ -390,12 +391,12 @@ public class RouteRecommenderTrigger extends GeofenceTrigger implements ITrigger
                     .toString();
             boolean notify = false;
             // Check if user is travelling by vehicle with at least 50% probability
-            if(true || ActivityInfo.isUserInVehicle(this.lastActivityInfo, 50)){
+            if(ActivityInfo.isUserInVehicle(this.lastActivityInfo, 50)){
                 message = new StringBuilder(message)
                         .append("We know you are in a vehicle but walking is good for your health!\n")
                         .append("Click to see the best walking route!")
                         .toString();
-                // TODO
+
                 final PendingIntent callBackIntent = PendingIntent.getBroadcast(context, 123456,
                         new Intent().setAction(CALLBACK_MAP).putExtra(CALLBACK_EXTRA, queryResult.getDestinationURL()),
                         PendingIntent.FLAG_UPDATE_CURRENT);
@@ -449,6 +450,4 @@ public class RouteRecommenderTrigger extends GeofenceTrigger implements ITrigger
             }
         }
     }
-
-
 }

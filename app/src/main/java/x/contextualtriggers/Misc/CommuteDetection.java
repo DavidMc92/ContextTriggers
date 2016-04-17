@@ -1,4 +1,4 @@
-package x.contextualtriggers.MessageObjects;
+package x.contextualtriggers.Misc;
 
 /**
  * Created by Sean on 16/04/2016.

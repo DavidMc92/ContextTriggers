@@ -20,7 +20,6 @@ import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import x.contextualtriggers.R;
@@ -41,8 +40,6 @@ public class MainActivity extends AppCompatActivity {
     private Map<Integer, ITrigger> triggerMap; // TODO Change to Set; need to lookup proper equals()
 
     private PreferenceContainer prefs;
-
-    private List<ITrigger> triggers;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -156,6 +153,9 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         PreferenceManager.getDefaultSharedPreferences(this)
                 .unregisterOnSharedPreferenceChangeListener(prefs);
+        for(Map.Entry<Integer, ITrigger> e : this.triggerMap.entrySet()){
+            this.triggerManager.disableTrigger(e.getValue());
+        }
     }
 
     @Override

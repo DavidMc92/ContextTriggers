@@ -2,11 +2,13 @@ package x.contextualtriggers.Triggers;
 
 import android.Manifest;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -48,7 +50,10 @@ import x.contextualtriggers.Services.WeatherService;
 
 public class RouteRecommenderTrigger extends GeofenceTrigger implements ITrigger, LocationListener,
         ITaskCallback<RouteRecommenderTrigger.RouteContainer> {
-    private static final int NOTIFICATION_ID = 64000;
+    private static final int NOTIFICATION_ID = 64003;
+    // Callback information for the Map display
+    private static final String CALLBACK_MAP = "SHOW_ROUTE_ON_MAP_ACTION",
+            CALLBACK_EXTRA = "QueryString";
 
     private final Context context;
 
@@ -86,15 +91,16 @@ public class RouteRecommenderTrigger extends GeofenceTrigger implements ITrigger
         // Check if all needed info has been delivered
         if(this.lastWeatherInfo != null && this.lastCalendarInfo != null  &&
                 this.lastGeofenceInfo != null){
-            boolean isSuitableWeather = this.lastWeatherInfo.getWeather() == WeatherType.CLOUDS ||
-                                        this.lastWeatherInfo.getWeather() == WeatherType.CLEAR;
+            boolean isSuitableWeather = this.lastWeatherInfo.getWeather() == WeatherType.CLEAR ||
+                    (this.lastWeatherInfo.getWeather() == WeatherType.CLOUDS &&
+                            this.lastWeatherInfo.getRainVolume() < 10); // Clear or cloudy but dry
             boolean isUserAvailable = CalendarInfo.isUserFree(this.lastCalendarInfo.getCalendarEvents(),
                     new Date().getTime());
 
             boolean isUserAtWork = LocationInfo.isUserInside(this.lastGeofenceInfo.getLocationInfo(),
-                                        GEOFENCE_WORK),
+                    GEOFENCE_WORK),
                     isUserAtHome = LocationInfo.isUserInside(this.lastGeofenceInfo.getLocationInfo(),
-                                        GEOFENCE_HOME);
+                            GEOFENCE_HOME);
             // First stage conditions are suitable
             if(true || (isSuitableWeather && isUserAvailable && !isUserAtWork && !isUserAtHome &&
                     nextPossibleNotificationTime < new Date().getTime())){
@@ -125,8 +131,6 @@ public class RouteRecommenderTrigger extends GeofenceTrigger implements ITrigger
                 new IntentFilter(CalendarService.CALENDAR_INTENT));
         LocalBroadcastManager.getInstance(context).registerReceiver(this,   // For consistency
                 new IntentFilter(ActivityRecognitionService.ACTIVITY_INTENT));
-        LocalBroadcastManager.getInstance(context).registerReceiver(this,
-                new IntentFilter("SHOW_ON_MAP_ACTION"));
     }
 
     @Override
@@ -141,10 +145,10 @@ public class RouteRecommenderTrigger extends GeofenceTrigger implements ITrigger
 
     private void startGoogleAPIUpdates(){
         if(client != null && client.isConnected() &&
-            (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
-                == android.content.pm.PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION)
-                    == android.content.pm.PackageManager.PERMISSION_GRANTED)) {
+                (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+                        == android.content.pm.PackageManager.PERMISSION_GRANTED ||
+                        ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION)
+                                == android.content.pm.PackageManager.PERMISSION_GRANTED)) {
 
             LocationServices.FusedLocationApi.requestLocationUpdates(client,
                     createLocationRequest(), this);
@@ -188,7 +192,7 @@ public class RouteRecommenderTrigger extends GeofenceTrigger implements ITrigger
     @Override
     public void onLocationChanged(Location location) {
         if(location != null) {
-           updateLocations(location);
+            updateLocations(location);
             // If we have two valid locations and check notification time again
             // Sometimes unregistering for the location service doesn't execute if
             // the expiration date is long for some reason...
@@ -216,9 +220,9 @@ public class RouteRecommenderTrigger extends GeofenceTrigger implements ITrigger
                 new GoogleMapsQueryTask(this, (float)currentLocation.getLatitude(),
                         (float)currentLocation.getLongitude(),
                         goingHome ? PreferenceContainer.getInstance(context).getHomeLat() :
-                                        PreferenceContainer.getInstance(context).getWorkLat(),
+                                PreferenceContainer.getInstance(context).getWorkLat(),
                         goingHome ? PreferenceContainer.getInstance(context).getHomeLong() :
-                                        PreferenceContainer.getInstance(context).getWorkLong(),
+                                PreferenceContainer.getInstance(context).getWorkLong(),
                         goingHome).execute();
             }
         }
@@ -283,25 +287,33 @@ public class RouteRecommenderTrigger extends GeofenceTrigger implements ITrigger
 
     private class GoogleMapsQueryTask extends AsyncTask<Void, Void, RouteContainer>{
         private static final String GOOGLE_MAPS_API_URL = "https://maps.googleapis.com/maps/api/directions/json?",
-                COORD_SPEC = "origin=%.2f,%.2f&destination=%.2f,%.2f",
+                COORD_SPEC = "origin=%.5f,%.5f&destination=%.5f,%.5f",
                 MODE_SPEC = "&mode=walking",
                 TIME_SPEC = "&departure_time=now",
                 API_KEY = "&key=AIzaSyDg0VW8SZY4CnHl9dHYU5x3iDlGiIeCJU8";
 
+        private static final String GOOGLE_MAPS_DEST_URL = "https://maps.google.com/maps?",
+                DEST_SPEC = "daddr=%.5f,%.5f",
+                DEST_MODE_SPEC = "&directions&mode=walking";
+
         private final ITaskCallback callback;
-        private final String queryString;
+        private final String queryString, destString;
         private final boolean userGoingHome;
 
         public GoogleMapsQueryTask(ITaskCallback callback, float currentLat, float currentLong,
                                    float destLat, float destLong, boolean userGoingHome){
             this.callback = callback;
             this.queryString = new StringBuilder(GOOGLE_MAPS_API_URL)
-                                .append(String.format(COORD_SPEC, currentLat, currentLong,
-                                    destLat, destLong))
-                                .append(MODE_SPEC)
-                                .append(TIME_SPEC)
-                                .append(API_KEY)
-                            .toString();
+                    .append(String.format(COORD_SPEC, currentLat, currentLong,
+                            destLat, destLong))
+                    .append(MODE_SPEC)
+                    .append(TIME_SPEC)
+                    .append(API_KEY)
+                    .toString();
+            this.destString = new StringBuilder(GOOGLE_MAPS_DEST_URL)
+                    .append(String.format(DEST_SPEC, destLat, destLong))
+                    .append(DEST_MODE_SPEC)
+                    .toString();
             this.userGoingHome = userGoingHome;
         }
 
@@ -309,7 +321,7 @@ public class RouteRecommenderTrigger extends GeofenceTrigger implements ITrigger
         protected RouteContainer doInBackground(Void... params) {
             final String result = ServiceHelper.performHTTP_GET(context, this.queryString);
             final long durationSeconds = processJSON(result);
-            return new RouteContainer(result, durationSeconds, userGoingHome);
+            return new RouteContainer(this.destString, durationSeconds, userGoingHome);
         }
 
         private long processJSON(final String queryResult){
@@ -340,18 +352,18 @@ public class RouteRecommenderTrigger extends GeofenceTrigger implements ITrigger
     }
 
     public class RouteContainer {
-        private final String query;
+        private final String destinationURL;
         private final long duration;
         private final boolean isUserGoingHome;
 
         public RouteContainer(String query, long duration, boolean isUserGoingHome){
-            this.query = query;
+            this.destinationURL = query;
             this.duration = duration;
             this.isUserGoingHome = isUserGoingHome;
         }
 
-        public String getQuery() {
-            return query;
+        public String getDestinationURL() {
+            return destinationURL;
         }
 
         public long getDuration() {
@@ -370,33 +382,43 @@ public class RouteRecommenderTrigger extends GeofenceTrigger implements ITrigger
         if(queryResult.getDuration()!= -1 && CalendarInfo.isUserFree(this.lastCalendarInfo.getCalendarEvents(),
                 TimeUnit.SECONDS.toMillis(queryResult.getDuration()))){
             String message = new StringBuilder("It's a nice day and your calendar indicates no urgent events.\n")
-                                                .append("It should take approximately ")
-                                                .append(timeMillisToString(queryResult.getDuration()*1000))
-                                                .append(" to reach your ")
-                                                .append((queryResult.isUserGoingHome) ? " home " : " workplace ")
-                                                .append("by walking.\n")
-                                            .toString();
+                    .append("It should take approximately ")
+                    .append(timeMillisToString(queryResult.getDuration()*1000))
+                    .append(" to reach your ")
+                    .append((queryResult.isUserGoingHome()) ? "home " : "workplace ")
+                    .append("by walking.\n")
+                    .toString();
             boolean notify = false;
             // Check if user is travelling by vehicle with at least 50% probability
-            if(ActivityInfo.isUserInVehicle(this.lastActivityInfo, 50)){
+            if(true || ActivityInfo.isUserInVehicle(this.lastActivityInfo, 50)){
                 message = new StringBuilder(message)
-                                    .append("We know you are in a vehicle but walking is good for your health!\n")
-                                    .append("Click to see the fastest route home from here!")
-                                    .toString();
+                        .append("We know you are in a vehicle but walking is good for your health!\n")
+                        .append("Click to see the best walking route!")
+                        .toString();
                 // TODO
+                final PendingIntent callBackIntent = PendingIntent.getBroadcast(context, 123456,
+                        new Intent().setAction(CALLBACK_MAP).putExtra(CALLBACK_EXTRA, queryResult.getDestinationURL()),
+                        PendingIntent.FLAG_UPDATE_CURRENT);
                 NotificationSender.sendNotificationWithIntent(context, NOTIFICATION_ID,
                         R.drawable.ic_directions_walk_white_18dp,
                         "Route Recommender",
                         message,
-                        null
+                        callBackIntent
                 );
                 notify = true;
-            }// Check if user is travelling by vehicle with at least 50% probability
-            else if(true || ActivityInfo.isUserOnFoot(this.lastActivityInfo, 50)){
+            }// Check if user is travelling on foot with at least 50% probability
+            else if(ActivityInfo.isUserOnFoot(this.lastActivityInfo, 50)){
                 NotificationSender.sendNotification(context, NOTIFICATION_ID,
                         R.drawable.ic_directions_walk_white_18dp,
                         "Route Recommender",
                         message + "Burn those calories!");
+                notify = true;
+            }
+            else if(ActivityInfo.isUserCycling(this.lastActivityInfo, 50)){
+                NotificationSender.sendNotification(context, NOTIFICATION_ID,
+                        R.drawable.ic_directions_walk_white_18dp,
+                        "Route Recommender",
+                        message + "We're sure you can defeat that target on bicycle!");
                 notify = true;
             }
 
@@ -411,4 +433,22 @@ public class RouteRecommenderTrigger extends GeofenceTrigger implements ITrigger
                 TimeUnit.MILLISECONDS.toMinutes(millis) % TimeUnit.HOURS.toMinutes(1),
                 TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1));
     }
+
+    public static class MapCallBackReceiver extends BroadcastReceiver{
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equals(CALLBACK_MAP)){
+                final String query = intent.getStringExtra(CALLBACK_EXTRA);
+                if(query != null){
+                    final Intent mapintent = new Intent(android.content.Intent.ACTION_VIEW,
+                            Uri.parse(query));
+                    mapintent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+                            Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    context.startActivity(mapintent);
+                }
+            }
+        }
+    }
+
+
 }

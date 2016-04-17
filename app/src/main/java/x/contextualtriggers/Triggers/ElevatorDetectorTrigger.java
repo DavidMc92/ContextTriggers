@@ -50,7 +50,7 @@ public class ElevatorDetectorTrigger extends BroadcastReceiver implements ITrigg
 
         barValues.add(barValue);
 
-        currentAltitude = (defaultAltitude - currentAltitude) * 8;
+        currentAltitude = (defaultAltitude - barValue) * 8;
 
         if (x < 15 && y < 15 && z < 15)
         {

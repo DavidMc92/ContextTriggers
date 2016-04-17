@@ -151,6 +151,7 @@ public class LunchTimeLocatorTrigger extends GeofenceTrigger implements ITrigger
                         R.drawable.ic_restaurant_white_18dp,
                         LunchTimeLocatorTrigger.class.getSimpleName(),
                         ("Why not try: " + res + " for Lunch its just a short walk away"),pendingIntentShow);
+
             }else {
 
                 NotificationSender.sendNotification(context, NOTIFICATION_ID,

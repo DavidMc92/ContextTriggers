@@ -52,6 +52,11 @@ public class ElevatorDetectorTrigger extends BroadcastReceiver implements ITrigg
 
         currentAltitude = (defaultAltitude - currentAltitude) * 8;
 
+        if (x < 15 && y < 15 && z < 15)
+        {
+            isAccValSmall = true;
+        }
+
         if(isAccValSmall)
         {
             altitude = prevAltitude - currentAltitude;
@@ -82,7 +87,7 @@ public class ElevatorDetectorTrigger extends BroadcastReceiver implements ITrigg
                         NotificationSender.sendNotification(context, NOTIFICATION_ID,
                                 R.drawable.elevator,
                                 RouteRecommenderTrigger.class.getSimpleName(),
-                                "You are using a lift, next time why not take the stairs");
+                                "It has been detected that you are using a lift, next time why not burn some calories by taking the stairs");
                         hasNotified = true;
                     }
                     else

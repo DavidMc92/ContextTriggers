@@ -17,6 +17,13 @@ public class DateCreation {
         return c.getTime();
     }
 
+    public static Date addHours(@NonNull Date date, int numHours){
+        final Calendar c = Calendar.getInstance();
+        c.setTime(date);
+        c.add(Calendar.HOUR_OF_DAY, numHours);
+        return c.getTime();
+    }
+
     public static Date getEndOfDay(@NonNull Date date){
         final Calendar c = Calendar.getInstance();
         c.setTime(date);

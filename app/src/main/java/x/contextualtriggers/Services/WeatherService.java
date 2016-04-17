@@ -70,7 +70,8 @@ public class WeatherService extends BackgroundService implements GoogleApiClient
     protected void onHandleIntent(Intent intent) {
         Log.d(WeatherService.class.getSimpleName(), "Fetching the weather.");
         updateLastKnownLocation();
-        broadcastWeather(processWeather(fetchWeather()));
+        broadcastWeather(processWeather(ServiceHelper.performHTTP_GET(getApplicationContext(),
+                buildURL())));
     }
 
     private void updateLastKnownLocation(){
@@ -86,7 +87,7 @@ public class WeatherService extends BackgroundService implements GoogleApiClient
         }
     }
 
-    private URL buildURL() throws IOException {
+    private String buildURL() {
         final StringBuilder builder = new StringBuilder(OPEN_WEATHER_API_URL);
         if(this.lastKnownLocation != null){
             builder.append(String.format(COORD_QUERY, this.lastKnownLocation.getLatitude(),
@@ -95,49 +96,7 @@ public class WeatherService extends BackgroundService implements GoogleApiClient
         else{
             builder.append(LOCATION_QUERY).append(DEFAULT_LOCATION);
         }
-        return new URL(builder.append(API_KEY).toString());
-    }
-
-    private String fetchWeather() {
-        String response = null;
-        // Check if permitted to access the internet and network available
-        if(ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.INTERNET)
-                == android.content.pm.PackageManager.PERMISSION_GRANTED && ServiceHelper.isNetworkAvailable(this)) {
-
-            HttpURLConnection connection = null;
-            BufferedReader reader = null;
-            try {
-                final URL url = buildURL();
-
-                connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("GET");
-                connection.setDoInput(true);
-                connection.connect();
-
-                reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-
-                final StringBuilder builder = new StringBuilder();
-                String s;
-                while ((s = reader.readLine()) != null) {
-                    builder.append(s);
-                }
-                response = builder.toString();
-            } catch (IOException e) {
-                Log.e(WeatherService.class.getSimpleName(), e.getMessage());
-            } finally {   // Remember to release resources
-                if (connection != null) {
-                    connection.disconnect();
-                }
-                try {
-                    if (reader != null) {
-                        reader.close();
-                    }
-                } catch (IOException e) {
-                    Log.e(WeatherService.class.getSimpleName(), "Unable to release BufferedReader.");
-                }
-            }
-        }
-        return response;
+        return builder.append(API_KEY).toString();
     }
 
     // JSON Information:        http://openweathermap.org/current

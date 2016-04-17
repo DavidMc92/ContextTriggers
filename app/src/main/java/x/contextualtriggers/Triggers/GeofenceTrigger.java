@@ -17,6 +17,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Result;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
@@ -45,6 +46,7 @@ public abstract class GeofenceTrigger extends BroadcastReceiver implements ITrig
         this.context = context;
         this.client = new GoogleApiClient.Builder(context)
                 .addApi(LocationServices.API)
+                .addApi(ActivityRecognition.API)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
@@ -95,9 +97,11 @@ public abstract class GeofenceTrigger extends BroadcastReceiver implements ITrig
     @Override
     public void unregisterReceivers(Context context) {
         LocalBroadcastManager.getInstance(context).unregisterReceiver(this);
-        LocationServices.GeofencingApi.removeGeofences(
-                this.client, getGeofencePendingIntent()
-        ).setResultCallback(this); // Result processed in onResult().
+        if(client.isConnected()) {
+            LocationServices.GeofencingApi.removeGeofences(
+                    this.client, getGeofencePendingIntent()
+            ).setResultCallback(this); // Result processed in onResult().
+        }
     }
 
     @Override

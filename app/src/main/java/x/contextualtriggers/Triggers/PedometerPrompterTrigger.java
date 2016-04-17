@@ -9,6 +9,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Pair;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -28,6 +29,8 @@ public class PedometerPrompterTrigger extends BroadcastReceiver implements ITrig
     private static final int NOTIFICATION_ID = 64002;
     private int steps;
     private Boolean hasNotified = false;
+    private Calendar c = Calendar.getInstance();
+    int hours = c.get(Calendar.HOUR_OF_DAY);
 
     // Required services for trigger conditions
     private IWeatherInfo currWeather;
@@ -67,8 +70,11 @@ public class PedometerPrompterTrigger extends BroadcastReceiver implements ITrig
             int target = 100;
             boolean hasMetTarget = steps >= target;
 
+            // Check that time of day is between 12pm and 8pm
+            boolean activeTime = hours < 12 && hours > 20;
+
             // Check weather, availability and step count
-            if (isSuitableWeather && isUserAvailable && !hasMetTarget) {
+            if (isSuitableWeather && isUserAvailable && !hasMetTarget && activeTime) {
                 NotificationSender.sendNotification(context, NOTIFICATION_ID,
                         R.drawable.ic_pedometer_white,
                         PedometerPrompterTrigger.class.getSimpleName(),

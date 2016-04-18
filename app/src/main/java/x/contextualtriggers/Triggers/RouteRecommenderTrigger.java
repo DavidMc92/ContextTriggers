@@ -88,7 +88,7 @@ public class RouteRecommenderTrigger extends GeofenceTrigger implements ITrigger
         else if(intent.getAction().equals(ActivityRecognitionService.ACTIVITY_INTENT)){
             this.lastActivityInfo = intent.getParcelableExtra(ActivityRecognitionService.ACTIVITY_DATA);
         }
-
+        
         // Check if all needed info has been delivered
         if(this.lastWeatherInfo != null && this.lastCalendarInfo != null  &&
                 this.lastGeofenceInfo != null){
@@ -118,8 +118,8 @@ public class RouteRecommenderTrigger extends GeofenceTrigger implements ITrigger
     @Override
     public List<Pair<Class<?>, Integer>> getDependentServices() {
         final List<Pair<Class<?>, Integer>> ret = new ArrayList<>(super.getDependentServices());
-        ret.add(new Pair(WeatherService.class, TimeUnit.MINUTES.toMillis(15)));
-        ret.add(new Pair(CalendarService.class, TimeUnit.MINUTES.toMillis(30)));
+        ret.add(new Pair(WeatherService.class, (int)TimeUnit.MINUTES.toMillis(15)));
+        ret.add(new Pair(CalendarService.class, (int)TimeUnit.MINUTES.toMillis(30)));
         return ret;
     }
 
